@@ -1,716 +1,948 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NKL Tours and Travels | Cab Booking</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NKL Tours and Travels | Cab Booking</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root {
+  --navy: #10243a;
+  --blue: #1769aa;
+  --gold: #f4b942;
+  --light: #f4f7fb;
+  --text: #1d2939;
+  --muted: #667085;
+  --border: #dce3eb;
+  --green: #16834a;
+}
 
-  <style>
-    :root {
-      --navy: #10243a;
-      --blue: #1769aa;
-      --gold: #f4b942;
-      --light: #f4f7fb;
-      --text: #1d2939;
-      --muted: #667085;
-      --border: #dce3eb;
-      --green: #16834a;
-      --white: #fff;
-    }
+* { box-sizing: border-box; }
 
-    * { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--light);
+  color: var(--text);
+  line-height: 1.5;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--light);
-      color: var(--text);
-      line-height: 1.5;
-    }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 18px 5%;
+  color: white;
+  background: var(--navy);
+}
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 18px 5%;
-      color: var(--white);
-      background: var(--navy);
-    }
+.brand {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
 
-    .brand {
-      font-size: 1.3rem;
-      font-weight: 800;
-    }
+.brand span { color: var(--gold); }
 
-    .brand span { color: var(--gold); }
+header a {
+  color: white;
+  font-weight: 700;
+  text-decoration: none;
+}
 
-    header a {
-      color: white;
-      font-weight: 700;
-      text-decoration: none;
-    }
+.hero {
+  padding: 40px 5%;
+  text-align: center;
+  color: white;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+}
 
-    .hero {
-      padding: 40px 5%;
-      text-align: center;
-      color: white;
-      background: linear-gradient(135deg, var(--navy), var(--blue));
-    }
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+}
 
-    .hero h1 {
-      margin: 0 0 10px;
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
-    }
+.hero p {
+  max-width: 650px;
+  margin: auto;
+}
 
-    .hero p {
-      max-width: 650px;
-      margin: auto;
-    }
+main {
+  width: min(1000px, 92%);
+  margin: 28px auto 48px;
+}
 
-    main {
-      width: min(1000px, 92%);
-      margin: 28px auto 48px;
-    }
+.card {
+  padding: clamp(18px, 4vw, 30px);
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(16,36,58,.09);
+}
 
-    .card {
-      padding: clamp(18px, 4vw, 30px);
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(16, 36, 58, .09);
-    }
+h2 {
+  margin: 0 0 18px;
+  color: var(--navy);
+}
 
-    h2 {
-      margin: 0 0 18px;
-      color: var(--navy);
-    }
+.trip-tabs {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 8px;
+  margin-bottom: 22px;
+}
 
-    .trip-tabs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 22px;
-    }
+button {
+  font: inherit;
+  cursor: pointer;
+}
 
-    button {
-      font: inherit;
-      cursor: pointer;
-    }
+.trip-tabs button,
+.secondary-btn {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: #f8fafc;
+  color: var(--navy);
+  font-weight: 700;
+}
 
-    .trip-tabs button,
-    .secondary-btn {
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: #f8fafc;
-      color: var(--navy);
-      font-weight: 700;
-    }
+.trip-tabs button.active {
+  color: white;
+  background: var(--blue);
+  border-color: var(--blue);
+}
 
-    .trip-tabs button.active {
-      color: white;
-      background: var(--blue);
-      border-color: var(--blue);
-    }
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+}
 
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
 
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      min-width: 0;
-    }
+.full { grid-column: 1 / -1; }
+.hidden { display: none !important; }
 
-    .full { grid-column: 1 / -1; }
-    .hidden { display: none !important; }
+label {
+  color: var(--navy);
+  font-weight: 700;
+  font-size: .92rem;
+}
 
-    label {
-      color: var(--navy);
-      font-weight: 700;
-      font-size: .92rem;
-    }
+input, select, textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font: inherit;
+  color: var(--text);
+  background: white;
+}
 
-    input, select, textarea {
-      width: 100%;
-      min-width: 0;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      font: inherit;
-      color: var(--text);
-      background: white;
-    }
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #b8dcf7;
+  border-color: var(--blue);
+}
 
-    input:focus, select:focus, textarea:focus {
-      outline: 2px solid #b8dcf7;
-      border-color: var(--blue);
-    }
+.route-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
 
-    .hint {
-      margin: 0;
-      color: var(--muted);
-      font-size: .82rem;
-    }
+.secondary-btn {
+  background: white;
+  border-color: var(--blue);
+  color: var(--blue);
+}
 
-    .route-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      margin-top: 16px;
-    }
+.secondary-btn:disabled {
+  opacity: .6;
+  cursor: wait;
+}
 
-    .secondary-btn {
-      background: white;
-      border-color: var(--blue);
-      color: var(--blue);
-    }
+#routeStatus {
+  color: var(--muted);
+  font-size: .9rem;
+}
 
-    .secondary-btn:disabled {
-      opacity: .6;
-      cursor: wait;
-    }
+#routeStatus.error { color: #b42318; }
+#routeStatus.success { color: var(--green); }
 
-    #routeStatus {
-      color: var(--muted);
-      font-size: .9rem;
-    }
+#map {
+  height: 280px;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #eef3f7;
+}
 
-    #map {
-      height: 300px;
-      margin-top: 16px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
+#map svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
-    .estimate {
-      margin-top: 24px;
-      padding: 20px;
-      border: 1px solid #d6eafb;
-      border-radius: 12px;
-      background: #eef6fd;
-    }
+.estimate {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid #d6eafb;
+  border-radius: 12px;
+  background: #eef6fd;
+}
 
-    .estimate h3 {
-      margin: 0 0 12px;
-      color: var(--navy);
-    }
+.estimate h3 {
+  margin: 0 0 12px;
+  color: var(--navy);
+}
 
-    .estimate-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 5px 0;
-    }
+.estimate-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 5px 0;
+}
 
-    .estimate-row.total {
-      margin-top: 8px;
-      padding-top: 12px;
-      border-top: 1px solid #c5dff4;
-      color: var(--navy);
-      font-size: 1.15rem;
-      font-weight: 800;
-    }
+.estimate-row.total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #c5dff4;
+  color: var(--navy);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
 
-    .estimate-note {
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: .85rem;
-    }
+.estimate-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
 
-    .book-btn {
-      width: 100%;
-      margin-top: 18px;
-      padding: 15px;
-      border: 0;
-      border-radius: 10px;
-      background: var(--green);
-      color: white;
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
+.book-btn {
+  width: 100%;
+  margin-top: 18px;
+  padding: 15px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--green);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
 
-    .info {
-      margin-top: 22px;
-      color: var(--muted);
-      font-size: .9rem;
-    }
+.info {
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: .9rem;
+}
 
-    footer {
-      padding: 22px 5%;
-      text-align: center;
-      color: #dce7f2;
-      background: var(--navy);
-      font-size: .9rem;
-    }
+footer {
+  padding: 22px 5%;
+  text-align: center;
+  color: #dce7f2;
+  background: var(--navy);
+  font-size: .9rem;
+}
 
-    @media (max-width: 620px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .full { grid-column: auto; }
-      .trip-tabs { grid-template-columns: 1fr; }
-    }
-  </style>
+@media (max-width:620px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .full { grid-column: auto; }
+  .trip-tabs { grid-template-columns: 1fr; }
+}
+</style>
 </head>
 
 <body>
-  <header>
-    <div class="brand">NKL <span>Tours and Travels</span></div>
-    <a href="#booking">Book a Cab</a>
-  </header>
 
-  <section class="hero">
-    <h1>Travel comfortably with NKL</h1>
-    <p>One Way Drop, Round Trip and Rental cab booking.</p>
-  </section>
+<header>
+  <div class="brand">NKL <span>Tours and Travels</span></div>
+  <a href="#booking">Book a Cab</a>
+</header>
 
-  <main id="booking">
-    <section class="card">
-      <h2>Book Your Trip</h2>
+<section class="hero">
+  <h1>Travel comfortably with NKL</h1>
+  <p>One Way Drop, Round Trip and Rental cab booking.</p>
+</section>
 
-      <div class="trip-tabs">
-        <button type="button" class="active" data-trip="oneway">One Way Drop</button>
-        <button type="button" data-trip="roundtrip">Round Trip</button>
-        <button type="button" data-trip="rental">Rental</button>
-      </div>
+<main id="booking">
+<section class="card">
 
-      <form id="bookingForm">
-        <div class="form-grid">
-          <div class="field">
-            <label for="pickup">Pickup location</label>
-            <input id="pickup" list="pickupSuggestions" placeholder="Type pickup location" autocomplete="off" required>
-            <datalist id="pickupSuggestions"></datalist>
-          </div>
+<h2>Book Your Trip</h2>
 
-          <div class="field">
-            <label for="drop">Drop location</label>
-            <input id="drop" list="dropSuggestions" placeholder="Type destination" autocomplete="off" required>
-            <datalist id="dropSuggestions"></datalist>
-          </div>
+<div class="trip-tabs">
+  <button type="button" class="active" data-trip="oneway">
+    One Way Drop
+  </button>
+  <button type="button" data-trip="roundtrip">
+    Round Trip
+  </button>
+  <button type="button" data-trip="rental">
+    Rental
+  </button>
+</div>
 
-          <div class="field">
-            <label for="travelDate">Travel date</label>
-            <input id="travelDate" type="date" required>
-          </div>
+<form id="bookingForm">
 
-          <div class="field">
-            <label for="travelTime">Pickup time</label>
-            <input id="travelTime" type="time" required>
-          </div>
+<div class="form-grid">
 
-          <div class="field">
-            <label for="vehicle">Vehicle</label>
-            <select id="vehicle" required>
-              <option value="sedan">Sedan</option>
-              <option value="suv">SUV (Ertiga)</option>
-              <option value="suvplus">SUV Plus</option>
-            </select>
-          </div>
+  <div class="field">
+    <label for="pickup">Pickup location</label>
+    <input id="pickup" list="pickupSuggestions"
+           placeholder="Type pickup location"
+           autocomplete="off" required>
+    <datalist id="pickupSuggestions"></datalist>
+  </div>
 
-          <div class="field rental-field hidden">
-            <label for="rentalHours">Rental hours</label>
-            <input id="rentalHours" type="number" min="1" step="1" value="4">
-          </div>
+  <div class="field">
+    <label for="drop">Drop location</label>
+    <input id="drop" list="dropSuggestions"
+           placeholder="Type destination"
+           autocomplete="off">
+    <datalist id="dropSuggestions"></datalist>
+  </div>
 
-          <div class="field rental-field hidden">
-            <label for="rentalKm">Expected total distance (km)</label>
-            <input id="rentalKm" type="number" min="0" step="0.1" placeholder="Enter total km">
-          </div>
+  <div class="field">
+    <label for="travelDate">Travel date</label>
+    <input id="travelDate" type="date" required>
+  </div>
 
-          <div class="field">
-            <label for="customerName">Customer name</label>
-            <input id="customerName" required placeholder="Your name">
-          </div>
+  <div class="field">
+    <label for="travelTime">Pickup time</label>
+    <input id="travelTime" type="time" required>
+  </div>
 
-          <div class="field">
-            <label for="customerPhone">Mobile number</label>
-            <input id="customerPhone" type="tel" required placeholder="Your mobile number">
-          </div>
+  <div class="field">
+    <label for="vehicle">Vehicle</label>
+    <select id="vehicle" required>
+      <option value="sedan">Sedan</option>
+      <option value="suv">SUV (Ertiga)</option>
+      <option value="suvplus">SUV Plus</option>
+    </select>
+  </div>
 
-          <div class="field">
-            <label for="passengers">Passengers</label>
-            <input id="passengers" type="number" min="1" max="20" value="1" required>
-          </div>
+  <div class="field rental-field hidden">
+    <label for="rentalHours">Rental hours</label>
+    <input id="rentalHours" type="number"
+           min="1" step="1" value="4">
+  </div>
 
-          <div class="field return-field hidden">
-            <label for="returnDate">Return date</label>
-            <input id="returnDate" type="date">
-          </div>
+  <div class="field rental-field hidden">
+    <label for="rentalKm">Expected total distance (km)</label>
+    <input id="rentalKm" type="number"
+           min="0" step="0.1"
+           placeholder="Enter total km">
+  </div>
 
-          <div class="field full">
-            <label for="notes">Additional details (optional)</label>
-            <textarea id="notes" rows="3" placeholder="Luggage, special requests, etc."></textarea>
-          </div>
-        </div>
+  <div class="field">
+    <label for="customerName">Customer name</label>
+    <input id="customerName" required placeholder="Your name">
+  </div>
 
-        <div class="route-actions">
-          <button type="button" class="secondary-btn" id="calculateRoute">Calculate Route & Fare</button>
-          <span id="routeStatus" aria-live="polite">Enter locations, then calculate the route.</span>
-        </div>
+  <div class="field">
+    <label for="customerPhone">Mobile number</label>
+    <input id="customerPhone" type="tel"
+           required placeholder="Your mobile number">
+  </div>
 
-        <div id="map"></div>
+  <div class="field">
+    <label for="passengers">Passengers</label>
+    <input id="passengers" type="number"
+           min="1" max="20" value="1" required>
+  </div>
 
-        <section class="estimate" aria-live="polite">
-          <h3>Fare Estimate</h3>
+  <div class="field return-field hidden">
+    <label for="returnDate">Return date</label>
+    <input id="returnDate" type="date">
+  </div>
 
-          <div class="estimate-row">
-            <span>Trip type</span>
-            <strong id="estimateTrip">One Way Drop</strong>
-          </div>
+  <div class="field full">
+    <label for="notes">Additional details (optional)</label>
+    <textarea id="notes" rows="3"
+              placeholder="Luggage, special requests, etc."></textarea>
+  </div>
 
-          <div class="estimate-row">
-            <span>Distance</span>
-            <strong id="estimateDistance">Not calculated</strong>
-          </div>
+</div>
 
-          <div class="estimate-row">
-            <span>Vehicle</span>
-            <strong id="estimateVehicle">Sedan</strong>
-          </div>
+<div class="route-actions">
+  <button type="button" class="secondary-btn"
+          id="calculateRoute">
+    Calculate Route & Fare
+  </button>
 
-          <div class="estimate-row total">
-            <span>Estimated fare</span>
-            <strong id="estimateFare">Not calculated</strong>
-          </div>
+  <span id="routeStatus" aria-live="polite">
+    Enter locations, then calculate the route.
+  </span>
+</div>
 
-          <p class="estimate-note" id="estimateNote">
-            Toll, permit, parking and other applicable charges are extra.
-          </p>
-        </section>
+<div id="map" aria-label="Route map"></div>
 
-        <button type="submit" class="book-btn">Book via WhatsApp</button>
-      </form>
+<section class="estimate" aria-live="polite">
+  <h3>Fare Estimate</h3>
 
-      <p class="info">
-        Route distance is an estimate. Final fare will be confirmed by NKL Tours and Travels.
-        Toll, permit, parking and other applicable charges are extra.
-      </p>
-    </section>
-  </main>
+  <div class="estimate-row">
+    <span>Trip type</span>
+    <strong id="estimateTrip">One Way Drop</strong>
+  </div>
 
-  <footer>
-    © <span id="year"></span> NKL Tours and Travels. All rights reserved.
-  </footer>
+  <div class="estimate-row">
+    <span>Distance</span>
+    <strong id="estimateDistance">Not calculated</strong>
+  </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <div class="estimate-row">
+    <span>Vehicle</span>
+    <strong id="estimateVehicle">Sedan</strong>
+  </div>
 
-  <script>
-    // WhatsApp number: country code + number, digits only.
-    const WHATSAPP_NUMBER = "916384253864";
+  <div class="estimate-row total">
+    <span>Estimated fare</span>
+    <strong id="estimateFare">Not calculated</strong>
+  </div>
 
-    const rates = {
-      sedan: {
-        name: "Sedan",
-        perKm: 15,
-        minOneWayKm: 130,
-        minPerDayKm: 250,
-        bataPerDay: 400,
-        rentalPerHour: 300,
-        includedKmPerHour: 10,
-        extraKm: 25
-      },
-      suv: {
-        name: "SUV (Ertiga)",
-        perKm: 20,
-        minOneWayKm: 130,
-        minPerDayKm: 250,
-        bataPerDay: 400,
-        rentalPerHour: 500,
-        includedKmPerHour: 10,
-        extraKm: 35
-      },
-      suvplus: {
-        name: "SUV Plus",
-        perKm: 22,
-        minOneWayKm: 130,
-        minPerDayKm: 250,
-        bataPerDay: 500,
-        rentalPerHour: 600,
-        includedKmPerHour: 10,
-        extraKm: 40
-      }
-    };
+  <p class="estimate-note" id="estimateNote">
+    Toll, permit, parking and other applicable charges are extra.
+  </p>
+</section>
 
-    const state = {
-      tripType: "oneway",
-      distanceKm: null,
-      start: null,
-      end: null,
-      routeLayer: null
-    };
+<button type="submit" class="book-btn">
+  Book via WhatsApp
+</button>
 
-    const $ = (id) => document.getElementById(id);
-    const money = (amount) => "₹" + Math.round(amount).toLocaleString("en-IN");
+</form>
 
-    $("year").textContent = new Date().getFullYear();
+<p class="info">
+  Route distance is an estimate. Final fare will be confirmed by
+  NKL Tours and Travels. Toll, permit, parking and other applicable
+  charges are extra.
+</p>
 
-    const currentDate = new Date();
-    const today = new Date(
-      currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
-    ).toISOString().slice(0, 10);
+</section>
+</main>
 
-    $("travelDate").min = today;
-    $("returnDate").min = today;
+<footer>
+  © <span id="year"></span> NKL Tours and Travels. All rights reserved.
+</footer>
 
-    const map = L.map("map").setView([20.5937, 78.9629], 5);
+<script>
+"use strict";
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(map);
+/* Configuration */
 
-    let pickupMarker = null;
-    let dropMarker = null;
+const WHATSAPP_NUMBER = "916384253864";
 
-    function setTripType(type) {
-      state.tripType = type;
+const rates = {
+  sedan: {
+    name: "Sedan",
+    perKm: 15,
+    minOneWayKm: 130,
+    minPerDayKm: 250,
+    bataPerDay: 400,
+    rentalPerHour: 300,
+    includedKmPerHour: 10,
+    extraKm: 25
+  },
+  suv: {
+    name: "SUV (Ertiga)",
+    perKm: 20,
+    minOneWayKm: 130,
+    minPerDayKm: 250,
+    bataPerDay: 400,
+    rentalPerHour: 500,
+    includedKmPerHour: 10,
+    extraKm: 35
+  },
+  suvplus: {
+    name: "SUV Plus",
+    perKm: 22,
+    minOneWayKm: 130,
+    minPerDayKm: 250,
+    bataPerDay: 500,
+    rentalPerHour: 600,
+    includedKmPerHour: 10,
+    extraKm: 40
+  }
+};
 
-      document.querySelectorAll("[data-trip]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.trip === type);
-      });
+const state = {
+  tripType: "oneway",
+  distanceKm: null,
+  start: null,
+  end: null,
+  routeGeometry: null
+};
 
-      document.querySelectorAll(".rental-field").forEach((field) => {
-        field.classList.toggle("hidden", type !== "rental");
-      });
+const $ = id => document.getElementById(id);
 
-      document.querySelectorAll(".return-field").forEach((field) => {
-        field.classList.toggle("hidden", type !== "roundtrip");
-      });
+const money = amount =>
+  "₹" + Math.round(amount).toLocaleString("en-IN");
 
-      $("drop").required = type !== "rental";
+$("year").textContent = new Date().getFullYear();
 
-      $("estimateTrip").textContent = {
-        oneway: "One Way Drop",
-        roundtrip: "Round Trip",
-        rental: "Rental"
-      }[type];
+/* Date setup */
 
-      updateEstimate();
-    }
+const now = new Date();
 
-    document.querySelectorAll("[data-trip]").forEach((button) => {
-      button.addEventListener("click", () => setTripType(button.dataset.trip));
-    });
+const today = new Date(
+  now.getTime() - now.getTimezoneOffset() * 60000
+).toISOString().slice(0,10);
 
-    $("travelDate").addEventListener("change", () => {
-      $("returnDate").min = $("travelDate").value || today;
+$("travelDate").min = today;
+$("returnDate").min = today;
 
-      if ($("returnDate").value && $("returnDate").value < $("travelDate").value) {
-        $("returnDate").value = $("travelDate").value;
-      }
+/* Status */
 
-      updateEstimate();
-    });
+function setStatus(message, type = "") {
+  $("routeStatus").textContent = message;
+  $("routeStatus").className = type;
+}
 
-    $("returnDate").addEventListener("change", updateEstimate);
-    $("vehicle").addEventListener("change", updateEstimate);
-    $("rentalHours").addEventListener("input", updateEstimate);
-    $("rentalKm").addEventListener("input", updateEstimate);
+/* Trip type */
 
-    function rentalDistance() {
-      const value = $("rentalKm").value.trim();
-      if (value === "") return null;
+function setTripType(type) {
+  if (!["oneway","roundtrip","rental"].includes(type)) return;
 
-      const number = Number(value);
-      return Number.isFinite(number) && number >= 0 ? number : null;
-    }
+  state.tripType = type;
 
-    function calculateFare() {
-      const vehicle = rates[$("vehicle").value];
+  document.querySelectorAll("[data-trip]").forEach(button => {
+    button.classList.toggle(
+      "active",
+      button.dataset.trip === type
+    );
+  });
 
-      if (state.tripType === "rental") {
-        const hours = Math.max(1, Number($("rentalHours").value) || 1);
-        const km = rentalDistance();
-        const includedKm = hours * vehicle.includedKmPerHour;
-        const baseFare = hours * vehicle.rentalPerHour;
+  document.querySelectorAll(".rental-field").forEach(field => {
+    field.classList.toggle("hidden", type !== "rental");
+  });
 
-        if (km === null) {
-          return {
-            distance: null,
-            fare: null,
-            note: `Rental base is ${money(baseFare)} for ${hours} hour(s), including ${includedKm} km. Enter total km for an estimate. Toll, permit and parking are extra.`
-          };
-        }
+  document.querySelectorAll(".return-field").forEach(field => {
+    field.classList.toggle("hidden", type !== "roundtrip");
+  });
 
-        const extraKm = Math.max(0, km - includedKm);
-        const fare = baseFare + extraKm * vehicle.extraKm;
+  $("drop").required = type !== "rental";
+  $("returnDate").required = type === "roundtrip";
 
-        return {
-          distance: km,
-          fare,
-          note: `Rental base: ${money(baseFare)}. Included distance: ${includedKm} km. Extra distance: ${extraKm} km. Toll, permit and parking are extra.`
-        };
-      }
+  $("estimateTrip").textContent = {
+    oneway: "One Way Drop",
+    roundtrip: "Round Trip",
+    rental: "Rental"
+  }[type];
 
-      if (state.distanceKm === null) {
-        return {
-          distance: null,
-          fare: null,
-          note: "Calculate the route distance to get an estimate. Toll, permit and parking are extra."
-        };
-      }
+  state.distanceKm = null;
+  state.routeGeometry = null;
 
-      if (state.tripType === "oneway") {
-        const billableKm = Math.max(state.distanceKm, vehicle.minOneWayKm);
+  setStatus("Trip type changed. Calculate the route again.");
 
-        return {
-          distance: state.distanceKm,
-          fare: billableKm * vehicle.perKm,
-          note: `One-way estimate uses ${billableKm.toFixed(1)} billable km at ${money(vehicle.perKm)} per km. Toll, permit and parking are extra.`
-        };
-      }
+  updateEstimate();
+}
 
-      const startDate = new Date(($("travelDate").value || today) + "T00:00:00");
-      const endDate = new Date(($("returnDate").value || $("travelDate").value || today) + "T00:00:00");
-      const days = Math.max(1, Math.ceil((endDate - startDate) / 86400000) + 1);
-      const billableKm = Math.max(state.distanceKm * 2, vehicle.minPerDayKm * days);
-      const fare = billableKm * vehicle.perKm + vehicle.bataPerDay * days;
+document.querySelectorAll("[data-trip]").forEach(button => {
+  button.addEventListener("click", () => {
+    setTripType(button.dataset.trip);
+  });
+});
 
+/* Date events */
+
+$("travelDate").addEventListener("change", () => {
+  $("returnDate").min = $("travelDate").value || today;
+
+  if (
+    $("returnDate").value &&
+    $("returnDate").value < $("travelDate").value
+  ) {
+    $("returnDate").value = $("travelDate").value;
+  }
+
+  updateEstimate();
+});
+
+$("returnDate").addEventListener("change", updateEstimate);
+$("vehicle").addEventListener("change", updateEstimate);
+$("rentalHours").addEventListener("input", updateEstimate);
+$("rentalKm").addEventListener("input", updateEstimate);
+
+/* Rental distance */
+
+function rentalDistance() {
+  const value = $("rentalKm").value.trim();
+
+  if (value === "") return null;
+
+  const number = Number(value);
+
+  return Number.isFinite(number) && number >= 0
+    ? number
+    : null;
+}
+
+/* Fare calculation */
+
+function calculateFare() {
+  const vehicle = rates[$("vehicle").value];
+
+  if (state.tripType === "rental") {
+    const hours = Math.max(
+      1,
+      Number($("rentalHours").value) || 1
+    );
+
+    const km = rentalDistance();
+    const includedKm = hours * vehicle.includedKmPerHour;
+    const baseFare = hours * vehicle.rentalPerHour;
+
+    if (km === null) {
       return {
-        distance: state.distanceKm * 2,
-        fare,
-        note: `Round trip estimate: ${billableKm.toFixed(1)} billable km plus driver bata of ${money(vehicle.bataPerDay)} × ${days} day(s). Toll, permit and parking are extra.`
+        distance: null,
+        fare: null,
+        note:
+          `Rental base is ${money(baseFare)} for ${hours} hour(s), ` +
+          `including ${includedKm} km. Enter total km for an estimate. ` +
+          "Toll, permit and parking are extra."
       };
     }
 
-    function updateEstimate() {
-      const result = calculateFare();
+    const extraKm = Math.max(0, km - includedKm);
+    const fare = baseFare + extraKm * vehicle.extraKm;
 
-      $("estimateVehicle").textContent = rates[$("vehicle").value].name;
-      $("estimateDistance").textContent =
-        result.distance === null ? "Not calculated" : `${result.distance.toFixed(1)} km`;
-      $("estimateFare").textContent =
-        result.fare === null ? "Not calculated" : money(result.fare);
-      $("estimateNote").textContent = result.note;
+    return {
+      distance: km,
+      fare,
+      note:
+        `Rental base: ${money(baseFare)}. ` +
+        `Included distance: ${includedKm} km. ` +
+        `Extra distance: ${extraKm} km. ` +
+        "Toll, permit and parking are extra."
+    };
+  }
+
+  if (state.distanceKm === null) {
+    return {
+      distance: null,
+      fare: null,
+      note:
+        "Calculate the route distance to get an estimate. " +
+        "Toll, permit and parking are extra."
+    };
+  }
+
+  if (state.tripType === "oneway") {
+    const billableKm = Math.max(
+      state.distanceKm,
+      vehicle.minOneWayKm
+    );
+
+    return {
+      distance: state.distanceKm,
+      fare: billableKm * vehicle.perKm,
+      note:
+        `One-way estimate uses ${billableKm.toFixed(1)} billable km ` +
+        `at ${money(vehicle.perKm)} per km. ` +
+        "Toll, permit and parking are extra."
+    };
+  }
+
+  const startDate = new Date(
+    ($("travelDate").value || today) + "T00:00:00"
+  );
+
+  const endDate = new Date(
+    ($("returnDate").value ||
+      $("travelDate").value ||
+      today) + "T00:00:00"
+  );
+
+  const days = Math.max(
+    1,
+    Math.ceil((endDate - startDate) / 86400000) + 1
+  );
+
+  const billableKm = Math.max(
+    state.distanceKm * 2,
+    vehicle.minPerDayKm * days
+  );
+
+  const fare =
+    billableKm * vehicle.perKm +
+    vehicle.bataPerDay * days;
+
+  return {
+    distance: state.distanceKm * 2,
+    fare,
+    note:
+      `Round trip estimate: ${billableKm.toFixed(1)} billable km ` +
+      `plus driver bata of ${money(vehicle.bataPerDay)} × ${days} day(s). ` +
+      "Toll, permit and parking are extra."
+  };
+}
+
+function updateEstimate() {
+  const result = calculateFare();
+
+  $("estimateVehicle").textContent =
+    rates[$("vehicle").value].name;
+
+  $("estimateDistance").textContent =
+    result.distance === null
+      ? "Not calculated"
+      : `${result.distance.toFixed(1)} km`;
+
+  $("estimateFare").textContent =
+    result.fare === null
+      ? "Not calculated"
+      : money(result.fare);
+
+  $("estimateNote").textContent = result.note;
+}
+
+/* Location search */
+
+async function searchLocations(query) {
+  const url = new URL("https://photon.komoot.io/api/");
+
+  url.searchParams.set("q", query);
+  url.searchParams.set("limit", "6");
+  url.searchParams.set("lang", "en");
+
+  const response = await fetch(url.toString());
+
+  if (!response.ok) {
+    throw new Error(
+      "Location search is temporarily unavailable. Please try again."
+    );
+  }
+
+  const data = await response.json();
+
+  return (data.features || []).map(feature => {
+    const properties = feature.properties || {};
+    const coordinates = feature.geometry.coordinates;
+
+    const label = [
+      properties.name,
+      properties.city,
+      properties.state,
+      properties.country
+    ].filter(Boolean).join(", ");
+
+    return {
+      label,
+      lat: Number(coordinates[1]),
+      lon: Number(coordinates[0])
+    };
+  }).filter(place =>
+    place.label &&
+    Number.isFinite(place.lat) &&
+    Number.isFinite(place.lon)
+  );
+}
+
+/* Location suggestions */
+
+const suggestionTimers = {};
+
+function setupSuggestions(inputId, listId, stateKey) {
+  const input = $(inputId);
+  const list = $(listId);
+
+  input.addEventListener("input", () => {
+    state[stateKey] = null;
+    state.distanceKm = null;
+
+    updateEstimate();
+
+    clearTimeout(suggestionTimers[inputId]);
+
+    const query = input.value.trim();
+
+    if (query.length < 3) {
+      list.replaceChildren();
+      return;
     }
 
-    // Photon location search. Suggestions are selectable from each input's dropdown.
-    async function searchLocations(query) {
-      const url = new URL("https://photon.komoot.io/api/");
-      url.searchParams.set("q", query);
-      url.searchParams.set("limit", "6");
-      url.searchParams.set("lang", "en");
+    suggestionTimers[inputId] = setTimeout(async () => {
+      try {
+        const places = await searchLocations(query);
 
-      const response = await fetch(url.toString());
-      if (!response.ok) throw new Error("Location search is temporarily unavailable.");
+        list.replaceChildren();
 
-      const data = await response.json();
+        places.forEach(place => {
+          const option = document.createElement("option");
+          option.value = place.label;
+          list.appendChild(option);
+        });
 
-      return (data.features || []).map((feature) => {
-        const properties = feature.properties || {};
-        const coordinates = feature.geometry.coordinates;
+      } catch (error) {
+        setStatus(error.message, "error");
+      }
+    }, 500);
+  });
 
-        const label = [
-          properties.name,
-          properties.city,
-          properties.state,
-          properties.country
-        ].filter(Boolean).join(", ");
+  input.addEventListener("change", async () => {
+    const query = input.value.trim();
 
-        return {
-          label,
-          lat: Number(coordinates[1]),
-          lon: Number(coordinates[0])
-        };
-      }).filter((place) => place.label && Number.isFinite(place.lat) && Number.isFinite(place.lon));
-    }
+    if (!query) return;
 
-    const suggestionTimers = {};
-
-    function setupSuggestions(inputId, listId, stateKey) {
-      const input = $(inputId);
-      const list = $(listId);
-
-      input.addEventListener("input", () => {
-        state[stateKey] = null;
-        state.distanceKm = null;
-        updateEstimate();
-
-        clearTimeout(suggestionTimers[inputId]);
-
-        const query = input.value.trim();
-        if (query.length < 3) {
-          list.replaceChildren();
-          return;
-        }
-
-        suggestionTimers[inputId] = setTimeout(async () => {
-          try {
-            const places = await searchLocations(query);
-            list.replaceChildren();
-
-            places.forEach((place) => {
-              const option = document.createElement("option");
-              option.value = place.label;
-              list.appendChild(option);
-            });
-          } catch (error) {
-            $("routeStatus").textContent = error.message;
-          }
-        }, 500);
-      });
-
-      input.addEventListener("change", async () => {
-        const query = input.value.trim();
-        if (!query) return;
-
-        try {
-          const places = await searchLocations(query);
-          const match = places.find((place) => place.label.toLowerCase() === query.toLowerCase())
-            || places[0];
-
-          if (match) {
-            state[stateKey] = match;
-            input.value = match.label;
-          } else {
-            state[stateKey] = null;
-          }
-        } catch (_) {
-          state[stateKey] = null;
-        }
-      });
-    }
-
-    setupSuggestions("pickup", "pickupSuggestions", "start");
-    setupSuggestions("drop", "dropSuggestions", "end");
-
-    // Resolve the typed text again on Calculate, so a selected suggestion is not required.
-    async function geocodePlace(query) {
+    try {
       const places = await searchLocations(query);
 
-      if (!places.length) {
-        throw new Error(`Location not found: ${query}. Please enter a more specific location.`);
+      const match = places.find(
+        place => place.label.toLowerCase() === query.toLowerCase()
+      ) || places[0];
+
+      if (match) {
+        state[stateKey] = match;
+        input.value = match.label;
+      } else {
+        state[stateKey] = null;
       }
 
-      const exact = places.find((place) => place.label.toLowerCase() === query.toLowerCase());
-      return exact || places[0];
+    } catch (_) {
+      state[stateKey] = null;
     }
+  });
+}
 
-    async function getRoute(start, end) {
-      const coordinates = `${start.lon},${start.lat};${end.lon},${end.lat}`;
-      const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+setupSuggestions("pickup","pickupSuggestions","start");
+setupSuggestions("drop","dropSuggestions","end");
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Route service is unavailable. Please try again.");
+/* Resolve location */
 
-      const data = await response.json();
+async function geocodePlace(query) {
+  const places = await searchLocations(query);
 
-      if (data.code !== "Ok" || !data.routes || !data.routes.length) {
-        throw new Error("No driving route found between these locations.");
-      }
+  if (!places.length) {
+    throw new Error(
+      `Location not found: ${query}. ` +
+      "Please enter a more specific location."
+    );
+  }
 
-      return data.routes[0];
-    }
+  const exact = places.find(
+    place => place.label.toLowerCase() === query.toLowerCase()
+  );
 
-    $("calculateRoute").addEventListener("click", async () => {
-      const pickupText = $("pickup").value.trim();
-      const dropText = $("drop").value.trim();
-      const button = $("calculat
+  return exact || places[0];
+}
+
+/* Route calculation */
+
+async function getRoute(start, end) {
+  const coordinates =
+    `${start.lon},${start.lat};${end.lon},${end.lat}`;
+
+  const url =
+    `https://router.project-osrm.org/route/v1/driving/` +
+    `${coordinates}?overview=full&geometries=geojson`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(
+      "Route service is unavailable. Please try again."
+    );
+  }
+
+  const data = await response.json();
+
+  if (
+    data.code !== "Ok" ||
+    !data.routes ||
+    !data.routes.length
+  ) {
+    throw new Error(
+      "No driving route found between these locations."
+    );
+  }
+
+  return data.routes[0];
+}
+
+/* Simple route map */
+
+function showRouteOnMap(start, end, geometry) {
+  const mapElement = $("map");
+
+  const points = geometry
+    ? geometry.coordinates
+    : [[start.lon,start.lat],[end.lon,end.lat]];
+
+  const lons = points.map(point => point[0]);
+  const lats = points.map(point => point[1]);
+
+  const minLon = Math.min(...lons);
+  const maxLon = Math.max(...lons);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+
+  const width = 900;
+  const height = 280;
+  const padding = 45;
+
+  const lonRange = Math.max(maxLon - minLon,0.001);
+  const latRange = Math.max(maxLat - minLat,0.001);
+
+  function project(point) {
+    const x = padding +
+      ((point[0] - minLon) / lonRange) *
+      (width - padding * 2);
+
+    const y = height - padding -
+      ((point[1] - minLat) / latRange) *
+      (height - padding * 2);
+
+    return [x,y];
+  }
+
+  const routePoints = points.map(project);
+
+  const path = routePoints.map((point,index) =>
+    `${index === 0 ? "M" : "L"} ${point[0]} ${point[1]}`
+  ).join(" ");
+
+  const startPoint = project([start.lon,start.lat]);
+  const endPoint = project([end.lon,end.lat]);
+
+  mapElement.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}"
+         role="img" aria-label="Route overview">
+
+      <rect width="${width}" height="${height}" fill="#eef3f7"/>
+
+      <path d="${path}"
+            fill="none"
+            stroke="#1769aa"
+            stroke-width="6"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+
+      <circle cx="${startPoint[0]}" cy="${startPoint[1]}"
+              r="10" fill="#16834a"
+              stroke="white" stroke-width="3"/>
+
+      <circle cx="${endPoint[0]}" cy="${endPoint[1]}"
+              r="10" fill="#b42318"
+              stroke="white" stroke-width="3"/>
+
+      <text x="${startPoint[0] + 14}"
+            y="${startPoint[1] - 12}"
+            font-size="15" font-weight="bold"
+            fill="#10243a">Pickup</text>
+
+      <text x="${endPoint[0] + 14}"
+            y="${endPoint[1] - 12}"
+            font-size="15" font-weight="bold"
+            fill="#10243a">Drop</text>
+
+    </svg>
+  
