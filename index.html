@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RK Cabs - Taxi Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f3f6fa;
+      color: #222;
+    }
+    header {
+      background: #123b66;
+      color: white;
+      padding: 24px 16px;
+      text-align: center;
+    }
+    main {
+      max-width: 520px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #0001;
+    }
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+    }
+    input, select, button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #bbb;
+      border-radius: 7px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      background: #123b66;
+      color: white;
+      border: 0;
+      font-weight: bold;
+    }
+    .note {
+      font-size: 14px;
+      color: #555;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RK Cabs</h1>
+    <p>Safe and Comfortable Taxi Service</p>
+  </header>
 
+  <main>
+    <h2>Book Your Ride</h2>
+
+    <form onsubmit="sendBooking(event)">
+      <label>Trip Type</label>
+      <select id="trip">
+        <option>One Way Drop</option>
+        <option>Round Trip</option>
+        <option>Rental</option>
+      </select>
+
+      <label>Pickup Location</label>
+      <input id="pickup" required placeholder="Enter pickup location">
+
+      <label>Drop Location</label>
+      <input id="drop" required placeholder="Enter drop location">
+
+      <label>Pickup Date</label>
+      <input id="date" type="date" required>
+
+      <label>Pickup Time</label>
+      <input id="time" type="time" required>
+
+      <label>Vehicle</label>
+      <select id="vehicle">
+        <option>Sedan</option>
+        <option>SUV (6+1)</option>
+        <option>SUV Plus (7+)</option>
+      </select>
+
+      <label>Passenger Count</label>
+      <input id="passengers" type="number" min="1" max="7" required>
+
+      <label>Customer Name</label>
+      <input id="name" required placeholder="Enter your name">
+
+      <label>Mobile Number</label>
+      <input id="phone" type="tel" required placeholder="Enter mobile number">
+
+      <button type="submit">Book via WhatsApp</button>
+    </form>
+
+    <p class="note">
+      Please book 2–3 hours before pickup. Inform us about pets while booking.
+      Toll, parking and permit charges are extra.
+    </p>
+  </main>
+
+  <script>
+    function sendBooking(event) {
+      event.preventDefault();
+
+      const message =
+        "RK Cabs Booking%0A" +
+        "Trip: " + document.getElementById("trip").value + "%0A" +
+        "Pickup: " + document.getElementById("pickup").value + "%0A" +
+        "Drop: " + document.getElementById("drop").value + "%0A" +
+        "Date: " + document.getElementById("date").value + "%0A" +
+        "Time: " + document.getElementById("time").value + "%0A" +
+        "Vehicle: " + document.getElementById("vehicle").value + "%0A" +
+        "Passengers: " + document.getElementById("passengers").value + "%0A" +
+        "Name: " + document.getElementById("name").value + "%0A" +
+        "Phone: " + document.getElementById("phone").value;
+
+      window.open("https://wa.me/916384253864?text=" + message, "_blank");
+    }
+  </script>
+</body>
+</html>
