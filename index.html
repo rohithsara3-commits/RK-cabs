@@ -3,13 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NKL Tours and Travels | Taxi Booking</title>
-  <meta name="description" content="Book one-way drops, round trips and rental cabs with NKL Tours and Travels.">
+  <title>NKL Tours and Travels | Cab Booking</title>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  >
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
   <style>
     :root {
@@ -20,8 +16,8 @@
       --text: #1d2939;
       --muted: #667085;
       --border: #dce3eb;
-      --white: #fff;
       --green: #16834a;
+      --white: #fff;
     }
 
     * { box-sizing: border-box; }
@@ -29,40 +25,40 @@
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
-      color: var(--text);
       background: var(--light);
+      color: var(--text);
       line-height: 1.5;
     }
 
     header {
-      background: var(--navy);
-      color: var(--white);
-      padding: 18px 5%;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 15px;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 12px;
+      padding: 18px 5%;
+      color: var(--white);
+      background: var(--navy);
     }
 
     .brand {
-      font-size: 1.35rem;
+      font-size: 1.3rem;
       font-weight: 800;
     }
 
     .brand span { color: var(--gold); }
 
     header a {
-      color: var(--white);
-      text-decoration: none;
+      color: white;
       font-weight: 700;
+      text-decoration: none;
     }
 
     .hero {
-      padding: 44px 5% 38px;
+      padding: 40px 5%;
       text-align: center;
-      color: var(--white);
-      background: linear-gradient(135deg, #10243a, #1769aa);
+      color: white;
+      background: linear-gradient(135deg, var(--navy), var(--blue));
     }
 
     .hero h1 {
@@ -72,19 +68,18 @@
 
     .hero p {
       max-width: 650px;
-      margin: 0 auto;
-      color: #e8f1fb;
+      margin: auto;
     }
 
     main {
       width: min(1000px, 92%);
-      margin: 28px auto 50px;
+      margin: 28px auto 48px;
     }
 
-    .booking-card {
-      background: var(--white);
-      border-radius: 16px;
+    .card {
       padding: clamp(18px, 4vw, 30px);
+      background: white;
+      border-radius: 16px;
       box-shadow: 0 8px 30px rgba(16, 36, 58, .09);
     }
 
@@ -100,20 +95,25 @@
       margin-bottom: 22px;
     }
 
-    .trip-tabs button {
-      border: 1px solid var(--border);
-      background: #f8fafc;
-      color: var(--navy);
-      padding: 12px 8px;
-      border-radius: 9px;
-      font-weight: 700;
+    button {
+      font: inherit;
       cursor: pointer;
     }
 
+    .trip-tabs button,
+    .secondary-btn {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: #f8fafc;
+      color: var(--navy);
+      font-weight: 700;
+    }
+
     .trip-tabs button.active {
+      color: white;
       background: var(--blue);
       border-color: var(--blue);
-      color: var(--white);
     }
 
     .form-grid {
@@ -126,25 +126,27 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
+      min-width: 0;
     }
 
-    .field.full { grid-column: 1 / -1; }
+    .full { grid-column: 1 / -1; }
+    .hidden { display: none !important; }
 
     label {
-      font-size: .92rem;
-      font-weight: 700;
       color: var(--navy);
+      font-weight: 700;
+      font-size: .92rem;
     }
 
     input, select, textarea {
       width: 100%;
       min-width: 0;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: 9px;
-      padding: 12px;
       font: inherit;
       color: var(--text);
-      background: var(--white);
+      background: white;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -153,12 +155,10 @@
     }
 
     .hint {
-      font-size: .8rem;
-      color: var(--muted);
       margin: 0;
+      color: var(--muted);
+      font-size: .82rem;
     }
-
-    .hidden { display: none !important; }
 
     .route-actions {
       display: flex;
@@ -169,13 +169,9 @@
     }
 
     .secondary-btn {
-      border: 1px solid var(--blue);
+      background: white;
+      border-color: var(--blue);
       color: var(--blue);
-      background: var(--white);
-      border-radius: 9px;
-      padding: 10px 14px;
-      font-weight: 700;
-      cursor: pointer;
     }
 
     .secondary-btn:disabled {
@@ -184,24 +180,24 @@
     }
 
     #routeStatus {
-      font-size: .9rem;
       color: var(--muted);
+      font-size: .9rem;
     }
 
     #map {
       height: 300px;
       margin-top: 16px;
+      border: 1px solid var(--border);
       border-radius: 12px;
       overflow: hidden;
-      border: 1px solid var(--border);
     }
 
     .estimate {
       margin-top: 24px;
       padding: 20px;
+      border: 1px solid #d6eafb;
       border-radius: 12px;
       background: #eef6fd;
-      border: 1px solid #d6eafb;
     }
 
     .estimate h3 {
@@ -217,12 +213,12 @@
     }
 
     .estimate-row.total {
-      border-top: 1px solid #c5dff4;
       margin-top: 8px;
       padding-top: 12px;
+      border-top: 1px solid #c5dff4;
+      color: var(--navy);
       font-size: 1.15rem;
       font-weight: 800;
-      color: var(--navy);
     }
 
     .estimate-note {
@@ -232,20 +228,16 @@
     }
 
     .book-btn {
-      display: block;
       width: 100%;
       margin-top: 18px;
       padding: 15px;
       border: 0;
       border-radius: 10px;
       background: var(--green);
-      color: var(--white);
+      color: white;
       font-size: 1.05rem;
       font-weight: 800;
-      cursor: pointer;
     }
-
-    .book-btn:hover { filter: brightness(.95); }
 
     .info {
       margin-top: 22px;
@@ -256,16 +248,15 @@
     footer {
       padding: 22px 5%;
       text-align: center;
-      background: var(--navy);
       color: #dce7f2;
+      background: var(--navy);
       font-size: .9rem;
     }
 
     @media (max-width: 620px) {
       .form-grid { grid-template-columns: 1fr; }
-      .field.full { grid-column: auto; }
+      .full { grid-column: auto; }
       .trip-tabs { grid-template-columns: 1fr; }
-      .estimate-row { font-size: .92rem; }
     }
   </style>
 </head>
@@ -278,14 +269,14 @@
 
   <section class="hero">
     <h1>Travel comfortably with NKL</h1>
-    <p>One Way Drop, Round Trip and Rental cab booking. Get an estimated fare and send your booking details on WhatsApp.</p>
+    <p>One Way Drop, Round Trip and Rental cab booking.</p>
   </section>
 
   <main id="booking">
-    <section class="booking-card">
+    <section class="card">
       <h2>Book Your Trip</h2>
 
-      <div class="trip-tabs" role="group" aria-label="Trip type">
+      <div class="trip-tabs">
         <button type="button" class="active" data-trip="oneway">One Way Drop</button>
         <button type="button" data-trip="roundtrip">Round Trip</button>
         <button type="button" data-trip="rental">Rental</button>
@@ -295,15 +286,15 @@
         <div class="form-grid">
           <div class="field">
             <label for="pickup">Pickup location</label>
-            <input id="pickup" list="placeSuggestions" placeholder="Enter pickup location" required autocomplete="off">
+            <input id="pickup" list="pickupSuggestions" placeholder="Type pickup location" autocomplete="off" required>
+            <datalist id="pickupSuggestions"></datalist>
           </div>
 
           <div class="field">
             <label for="drop">Drop location</label>
-            <input id="drop" list="placeSuggestions" placeholder="Enter destination" required autocomplete="off">
+            <input id="drop" list="dropSuggestions" placeholder="Type destination" autocomplete="off" required>
+            <datalist id="dropSuggestions"></datalist>
           </div>
-
-          <datalist id="placeSuggestions"></datalist>
 
           <div class="field">
             <label for="travelDate">Travel date</label>
@@ -325,33 +316,32 @@
           </div>
 
           <div class="field rental-field hidden">
-            <label for="rentalHours">Rental duration (hours)</label>
+            <label for="rentalHours">Rental hours</label>
             <input id="rentalHours" type="number" min="1" step="1" value="4">
           </div>
 
           <div class="field rental-field hidden">
             <label for="rentalKm">Expected total distance (km)</label>
-            <input id="rentalKm" type="number" min="0" step="1" placeholder="Enter total trip km">
-            <p class="hint">Enter the total distance expected during the rental.</p>
+            <input id="rentalKm" type="number" min="0" step="0.1" placeholder="Enter total km">
           </div>
 
           <div class="field">
-            <label for="customerName">Your name</label>
-            <input id="customerName" placeholder="Customer name" required>
+            <label for="customerName">Customer name</label>
+            <input id="customerName" required placeholder="Your name">
           </div>
 
           <div class="field">
             <label for="customerPhone">Mobile number</label>
-            <input id="customerPhone" type="tel" inputmode="tel" placeholder="Your mobile number" required>
+            <input id="customerPhone" type="tel" required placeholder="Your mobile number">
           </div>
 
           <div class="field">
-            <label for="passengers">Number of passengers</label>
+            <label for="passengers">Passengers</label>
             <input id="passengers" type="number" min="1" max="20" value="1" required>
           </div>
 
-          <div class="field">
-            <label for="returnDate">Return date (Round Trip only)</label>
+          <div class="field return-field hidden">
+            <label for="returnDate">Return date</label>
             <input id="returnDate" type="date">
           </div>
 
@@ -362,41 +352,46 @@
         </div>
 
         <div class="route-actions">
-          <button type="button" id="calculateRoute" class="secondary-btn">Calculate route distance</button>
-          <span id="routeStatus" aria-live="polite">Enter pickup and drop locations to calculate distance.</span>
+          <button type="button" class="secondary-btn" id="calculateRoute">Calculate Route & Fare</button>
+          <span id="routeStatus" aria-live="polite">Enter locations, then calculate the route.</span>
         </div>
 
-        <div id="map" aria-label="Route map"></div>
+        <div id="map"></div>
 
-        <div class="estimate" aria-live="polite">
+        <section class="estimate" aria-live="polite">
           <h3>Fare Estimate</h3>
+
           <div class="estimate-row">
             <span>Trip type</span>
             <strong id="estimateTrip">One Way Drop</strong>
           </div>
+
           <div class="estimate-row">
-            <span>Distance used for estimate</span>
+            <span>Distance</span>
             <strong id="estimateDistance">Not calculated</strong>
           </div>
+
           <div class="estimate-row">
             <span>Vehicle</span>
             <strong id="estimateVehicle">Sedan</strong>
           </div>
-          <div class="estimate-row">
+
+          <div class="estimate-row total">
             <span>Estimated fare</span>
             <strong id="estimateFare">Not calculated</strong>
           </div>
+
           <p class="estimate-note" id="estimateNote">
             Toll, permit, parking and other applicable charges are extra.
           </p>
-        </div>
+        </section>
 
         <button type="submit" class="book-btn">Book via WhatsApp</button>
       </form>
 
       <p class="info">
-        Route distance is estimated using OpenStreetMap routing services and may differ from the actual route.
-        Final fare will be confirmed by NKL Tours and Travels.
+        Route distance is an estimate. Final fare will be confirmed by NKL Tours and Travels.
+        Toll, permit, parking and other applicable charges are extra.
       </p>
     </section>
   </main>
@@ -406,8 +401,9 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
   <script>
-    // Replace this with your WhatsApp number: country code + number, digits only.
+    // WhatsApp number: country code + number, digits only.
     const WHATSAPP_NUMBER = "916384253864";
 
     const rates = {
@@ -416,7 +412,7 @@
         perKm: 15,
         minOneWayKm: 130,
         minPerDayKm: 250,
-        driverBataPerDay: 400,
+        bataPerDay: 400,
         rentalPerHour: 300,
         includedKmPerHour: 10,
         extraKm: 25
@@ -426,7 +422,7 @@
         perKm: 20,
         minOneWayKm: 130,
         minPerDayKm: 250,
-        driverBataPerDay: 400,
+        bataPerDay: 400,
         rentalPerHour: 500,
         includedKmPerHour: 10,
         extraKm: 35
@@ -436,7 +432,7 @@
         perKm: 22,
         minOneWayKm: 130,
         minPerDayKm: 250,
-        driverBataPerDay: 500,
+        bataPerDay: 500,
         rentalPerHour: 600,
         includedKmPerHour: 10,
         extraKm: 40
@@ -446,9 +442,8 @@
     const state = {
       tripType: "oneway",
       distanceKm: null,
-      routeDescription: "",
-      pickupCoordinates: null,
-      dropCoordinates: null,
+      start: null,
+      end: null,
       routeLayer: null
     };
 
@@ -457,22 +452,23 @@
 
     $("year").textContent = new Date().getFullYear();
 
-    const now = new Date();
-    const localToday = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString().slice(0, 10);
-    $("travelDate").min = localToday;
-    $("returnDate").min = localToday;
+    const currentDate = new Date();
+    const today = new Date(
+      currentDate.getTime() - currentDate.getTimezoneOffset() * 60000
+    ).toISOString().slice(0, 10);
 
-    const map = L.map("map").setView([11.0168, 76.9558], 6);
+    $("travelDate").min = today;
+    $("returnDate").min = today;
+
+    const map = L.map("map").setView([20.5937, 78.9629], 5);
+
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution: '&copy; OpenStreetMap contributors',
       maxZoom: 19
     }).addTo(map);
 
-    const pickupMarker = L.marker([11.0168, 76.9558]).addTo(map);
-    const dropMarker = L.marker([11.0168, 76.9558]).addTo(map);
-    pickupMarker.setOpacity(0);
-    dropMarker.setOpacity(0);
+    let pickupMarker = null;
+    let dropMarker = null;
 
     function setTripType(type) {
       state.tripType = type;
@@ -485,16 +481,11 @@
         field.classList.toggle("hidden", type !== "rental");
       });
 
-      $("returnDate").closest(".field").classList.toggle("hidden", type !== "roundtrip");
+      document.querySelectorAll(".return-field").forEach((field) => {
+        field.classList.toggle("hidden", type !== "roundtrip");
+      });
+
       $("drop").required = type !== "rental";
-
-      $("pickup").placeholder = type === "rental"
-        ? "Rental starting location"
-        : "Enter pickup location";
-
-      $("drop").placeholder = type === "rental"
-        ? "Optional destination"
-        : "Enter destination";
 
       $("estimateTrip").textContent = {
         oneway: "One Way Drop",
@@ -510,31 +501,52 @@
     });
 
     $("travelDate").addEventListener("change", () => {
-      $("returnDate").min = $("travelDate").value || localToday;
+      $("returnDate").min = $("travelDate").value || today;
 
       if ($("returnDate").value && $("returnDate").value < $("travelDate").value) {
         $("returnDate").value = $("travelDate").value;
       }
+
+      updateEstimate();
     });
+
+    $("returnDate").addEventListener("change", updateEstimate);
+    $("vehicle").addEventListener("change", updateEstimate);
+    $("rentalHours").addEventListener("input", updateEstimate);
+    $("rentalKm").addEventListener("input", updateEstimate);
+
+    function rentalDistance() {
+      const value = $("rentalKm").value.trim();
+      if (value === "") return null;
+
+      const number = Number(value);
+      return Number.isFinite(number) && number >= 0 ? number : null;
+    }
 
     function calculateFare() {
       const vehicle = rates[$("vehicle").value];
 
       if (state.tripType === "rental") {
         const hours = Math.max(1, Number($("rentalHours").value) || 1);
-        const enteredKm = $("rentalKm").value.trim();
-        const distance = enteredKm === "" ? null : Math.max(0, Number(enteredKm));
+        const km = rentalDistance();
         const includedKm = hours * vehicle.includedKmPerHour;
         const baseFare = hours * vehicle.rentalPerHour;
-        const extraKm = distance === null ? 0 : Math.max(0, distance - includedKm);
+
+        if (km === null) {
+          return {
+            distance: null,
+            fare: null,
+            note: `Rental base is ${money(baseFare)} for ${hours} hour(s), including ${includedKm} km. Enter total km for an estimate. Toll, permit and parking are extra.`
+          };
+        }
+
+        const extraKm = Math.max(0, km - includedKm);
         const fare = baseFare + extraKm * vehicle.extraKm;
 
         return {
-          distance,
+          distance: km,
           fare,
-          note: distance === null
-            ? `Rental base: ${money(baseFare)} for ${hours} hour(s), including ${includedKm} km. Enter expected total km for a complete estimate. Toll, permit and parking are extra.`
-            : `Rental base: ${money(baseFare)} for ${hours} hour(s), including ${includedKm} km. Extra distance: ${extraKm} km × ${money(vehicle.extraKm)} per km. Toll, permit and parking are extra.`
+          note: `Rental base: ${money(baseFare)}. Included distance: ${includedKm} km. Extra distance: ${extraKm} km. Toll, permit and parking are extra.`
         };
       }
 
@@ -542,46 +554,37 @@
         return {
           distance: null,
           fare: null,
-          note: "Calculate the route distance to see an estimated fare. Toll, permit and parking are extra."
+          note: "Calculate the route distance to get an estimate. Toll, permit and parking are extra."
         };
       }
 
       if (state.tripType === "oneway") {
         const billableKm = Math.max(state.distanceKm, vehicle.minOneWayKm);
-        const fare = billableKm * vehicle.perKm;
 
         return {
           distance: state.distanceKm,
-          fare,
-          note: `One-way fare uses ${billableKm} km (minimum ${vehicle.minOneWayKm} km) × ${money(vehicle.perKm)} per km. Toll, permit and parking are extra.`
+          fare: billableKm * vehicle.perKm,
+          note: `One-way estimate uses ${billableKm.toFixed(1)} billable km at ${money(vehicle.perKm)} per km. Toll, permit and parking are extra.`
         };
       }
 
-      const returnDate = $("returnDate").value || $("travelDate").value;
-      const startDate = new Date($("travelDate").value + "T00:00:00");
-      const endDate = new Date(returnDate + "T00:00:00");
-      const dayCount = Math.max(
-        1,
-        Math.ceil((endDate - startDate) / 86400000) + 1
-      );
-      const billableKm = Math.max(
-        state.distanceKm * 2,
-        vehicle.minPerDayKm * dayCount
-      );
-      const fare = billableKm * vehicle.perKm + vehicle.driverBataPerDay * dayCount;
+      const startDate = new Date(($("travelDate").value || today) + "T00:00:00");
+      const endDate = new Date(($("returnDate").value || $("travelDate").value || today) + "T00:00:00");
+      const days = Math.max(1, Math.ceil((endDate - startDate) / 86400000) + 1);
+      const billableKm = Math.max(state.distanceKm * 2, vehicle.minPerDayKm * days);
+      const fare = billableKm * vehicle.perKm + vehicle.bataPerDay * days;
 
       return {
         distance: state.distanceKm * 2,
         fare,
-        note: `Round-trip estimate: ${billableKm} billable km × ${money(vehicle.perKm)} per km, plus driver bata ${money(vehicle.driverBataPerDay)} × ${dayCount} day(s). Toll, permit and parking are extra.`
+        note: `Round trip estimate: ${billableKm.toFixed(1)} billable km plus driver bata of ${money(vehicle.bataPerDay)} × ${days} day(s). Toll, permit and parking are extra.`
       };
     }
 
     function updateEstimate() {
-      const vehicle = rates[$("vehicle").value];
       const result = calculateFare();
 
-      $("estimateVehicle").textContent = vehicle.name;
+      $("estimateVehicle").textContent = rates[$("vehicle").value].name;
       $("estimateDistance").textContent =
         result.distance === null ? "Not calculated" : `${result.distance.toFixed(1)} km`;
       $("estimateFare").textContent =
@@ -589,92 +592,125 @@
       $("estimateNote").textContent = result.note;
     }
 
-    $("vehicle").addEventListener("change", updateEstimate);
-    $("rentalHours").addEventListener("input", updateEstimate);
-    $("rentalKm").addEventListener("input", updateEstimate);
-    $("returnDate").addEventListener("change", updateEstimate);
+    // Photon location search. Suggestions are selectable from each input's dropdown.
+    async function searchLocations(query) {
+      const url = new URL("https://photon.komoot.io/api/");
+      url.searchParams.set("q", query);
+      url.searchParams.set("limit", "6");
+      url.searchParams.set("lang", "en");
 
-    async function geocodePlace(place) {
-      const url = new URL("https://nominatim.openstreetmap.org/search");
-      url.searchParams.set("q", place);
-      url.searchParams.set("format", "jsonv2");
-      url.searchParams.set("limit", "1");
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error("Location search is temporarily unavailable.");
 
-      const response = await fetch(url.toString(), {
-        headers: { "Accept": "application/json" }
-      });
+      const data = await response.json();
 
-      if (!response.ok) throw new Error("Location search failed.");
+      return (data.features || []).map((feature) => {
+        const properties = feature.properties || {};
+        const coordinates = feature.geometry.coordinates;
 
-      const results = await response.json();
-      if (!results.length) throw new Error(`Location not found: ${place}`);
+        const label = [
+          properties.name,
+          properties.city,
+          properties.state,
+          properties.country
+        ].filter(Boolean).join(", ");
 
-      return {
-        lat: Number(results[0].lat),
-        lon: Number(results[0].lon),
-        name: results[0].display_name
-      };
+        return {
+          label,
+          lat: Number(coordinates[1]),
+          lon: Number(coordinates[0])
+        };
+      }).filter((place) => place.label && Number.isFinite(place.lat) && Number.isFinite(place.lon));
     }
 
-    async function fetchRoute(start, end) {
+    const suggestionTimers = {};
+
+    function setupSuggestions(inputId, listId, stateKey) {
+      const input = $(inputId);
+      const list = $(listId);
+
+      input.addEventListener("input", () => {
+        state[stateKey] = null;
+        state.distanceKm = null;
+        updateEstimate();
+
+        clearTimeout(suggestionTimers[inputId]);
+
+        const query = input.value.trim();
+        if (query.length < 3) {
+          list.replaceChildren();
+          return;
+        }
+
+        suggestionTimers[inputId] = setTimeout(async () => {
+          try {
+            const places = await searchLocations(query);
+            list.replaceChildren();
+
+            places.forEach((place) => {
+              const option = document.createElement("option");
+              option.value = place.label;
+              list.appendChild(option);
+            });
+          } catch (error) {
+            $("routeStatus").textContent = error.message;
+          }
+        }, 500);
+      });
+
+      input.addEventListener("change", async () => {
+        const query = input.value.trim();
+        if (!query) return;
+
+        try {
+          const places = await searchLocations(query);
+          const match = places.find((place) => place.label.toLowerCase() === query.toLowerCase())
+            || places[0];
+
+          if (match) {
+            state[stateKey] = match;
+            input.value = match.label;
+          } else {
+            state[stateKey] = null;
+          }
+        } catch (_) {
+          state[stateKey] = null;
+        }
+      });
+    }
+
+    setupSuggestions("pickup", "pickupSuggestions", "start");
+    setupSuggestions("drop", "dropSuggestions", "end");
+
+    // Resolve the typed text again on Calculate, so a selected suggestion is not required.
+    async function geocodePlace(query) {
+      const places = await searchLocations(query);
+
+      if (!places.length) {
+        throw new Error(`Location not found: ${query}. Please enter a more specific location.`);
+      }
+
+      const exact = places.find((place) => place.label.toLowerCase() === query.toLowerCase());
+      return exact || places[0];
+    }
+
+    async function getRoute(start, end) {
       const coordinates = `${start.lon},${start.lat};${end.lon},${end.lat}`;
       const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
 
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Route service is unavailable.");
+      if (!response.ok) throw new Error("Route service is unavailable. Please try again.");
 
       const data = await response.json();
+
       if (data.code !== "Ok" || !data.routes || !data.routes.length) {
-        throw new Error("No driving route found for these locations.");
+        throw new Error("No driving route found between these locations.");
       }
 
       return data.routes[0];
     }
 
     $("calculateRoute").addEventListener("click", async () => {
-      const pickup = $("pickup").value.trim();
-      const drop = $("drop").value.trim();
-
-      if (!pickup || !drop) {
-        $("routeStatus").textContent = "Enter both pickup and drop locations first.";
-        return;
-      }
-
-      const button = $("calculateRoute");
-      button.disabled = true;
-      $("routeStatus").textContent = "Finding locations and calculating route…";
-
-      try {
-        const [start, end] = await Promise.all([
-          geocodePlace(pickup),
-          geocodePlace(drop)
-        ]);
-
-        const route = await fetchRoute(start, end);
-
-        state.pickupCoordinates = start;
-        state.dropCoordinates = end;
-        state.distanceKm = route.distance / 1000;
-        state.routeDescription = `${start.name} to ${end.name}`;
-
-        pickupMarker.setLatLng([start.lat, start.lon]).setOpacity(1);
-        dropMarker.setLatLng([end.lat, end.lon]).setOpacity(1);
-
-        if (state.routeLayer) map.removeLayer(state.routeLayer);
-
-        state.routeLayer = L.geoJSON(route.geometry, {
-          style: { color: "#1769aa", weight: 5, opacity: .85 }
-        }).addTo(map);
-
-        map.fitBounds(state.routeLayer.getBounds(), { padding: [25, 25] });
-
-        $("routeStatus").textContent =
-          `Route distance: ${state.distanceKm.toFixed(1)} km · Approx. ${(route.duration / 3600).toFixed(1)} hours`;
-
-        updateEstimate();
-      } catch (error) {
-        state.distanceKm = null;
-        $("routeStatus").textContent = error.message || "Could not calculate the route.";
-        updateEstimate();
-      } finally {
-        bu
+      const pickupText = $("pickup").value.trim();
+      const dropText = $("drop").value.trim();
+      const button = $("calculat
