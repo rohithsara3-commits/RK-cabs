@@ -2,516 +2,452 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>RK Cabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RK Cabs | Booking</title>
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #f1f5f9; color: #222; }
-    header { background: #173f68; color: #fff; text-align: center; padding: 24px 12px; }
-    header h1 { margin: 0 0 8px; }
-    main { max-width: 760px; margin: 18px auto; padding: 20px; background: #fff; border-radius: 14px; }
-    label { display: block; margin: 14px 0 6px; font-weight: bold; }
-    input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 8px; font-size: 16px; }
-    button { width: 100%; padding: 14px; margin-top: 14px; border: 0; border-radius: 8px; background: #173f68; color: #fff; font-size: 16px; font-weight: bold; }
-    button:disabled { opacity: .6; }
-    #map { height: 300px; margin-top: 14px; display: none; border-radius: 10px; }
-    #status { margin-top: 10px; color: #555; line-height: 1.5; }
-    #estimate { display: none; margin-top: 16px; padding: 16px; background: #edf5fc; border-radius: 10px; line-height: 1.7; }
-    .hidden { display: none !important; }
-    .note { color: #555; font-size: 13px; line-height: 1.5; }
-    .check { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
-    .check input { width: 20px; height: 20px; }
-    .check label { margin: 0; }
-    @media(max-width:600px) { main { margin: 10px; padding: 15px; } }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f5f8;
+      color: #172033;
+    }
+    header {
+      background: #101827;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 6px; color: #ffc928; }
+    main {
+      max-width: 760px;
+      margin: 20px auto;
+      padding: 0 12px;
+    }
+    .card {
+      background: white;
+      padding: 18px;
+      margin-bottom: 16px;
+      border-radius: 12px;
+      box-shadow: 0 3px 14px #00000012;
+    }
+    h2 { margin-top: 0; font-size: 20px; }
+    label {
+      display: block;
+      font-weight: bold;
+      margin: 13px 0 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd2dc;
+      border-radius: 7px;
+      font-size: 16px;
+      background: white;
+    }
+    .suggestions {
+      border: 1px solid #cbd2dc;
+      border-top: 0;
+      border-radius: 0 0 7px 7px;
+      max-height: 190px;
+      overflow-y: auto;
+      display: none;
+      background: white;
+    }
+    .suggestion {
+      padding: 11px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .suggestion:hover { background: #eef4ff; }
+    #map {
+      width: 100%;
+      height: 300px;
+      border-radius: 9px;
+      margin-top: 14px;
+    }
+    .summary {
+      background: #f7f9fc;
+      padding: 14px;
+      border-radius: 8px;
+      line-height: 1.8;
+    }
+    .total {
+      font-size: 23px;
+      font-weight: bold;
+      color: #087443;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: 0;
+      border-radius: 8px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+    #whatsappBtn { background: #25d366; color: white; }
+    #status { font-size: 14px; color: #555; margin-top: 8px; }
+    .small { font-size: 13px; color: #667085; }
   </style>
 </head>
+
 <body>
 <header>
   <h1>RK Cabs</h1>
-  <p>Safe and Comfortable Taxi Service</p>
+  <div>Safe • Comfortable • Reliable</div>
 </header>
 
 <main>
-  <h2>Book Your Ride</h2>
+  <section class="card">
+    <h2>Trip Details</h2>
 
-  <label for="bookingType">Booking Type</label>
-  <select id="bookingType">
-    <option value="trip">One Way / Round Trip</option>
-    <option value="rental">Rental</option>
-  </select>
-
-  <div id="tripFields">
     <label for="tripType">Trip Type</label>
     <select id="tripType">
       <option value="oneway">One Way Drop</option>
-      <option value="roundtrip">Round Trip</option>
+      <option value="round">Round Trip</option>
     </select>
-  </div>
 
-  <label for="pickup">Pickup Location</label>
-  <input id="pickup" placeholder="Enter pickup location">
+    <label for="pickup">Pickup Location</label>
+    <input id="pickup" placeholder="Type pickup location" autocomplete="off">
+    <div id="pickupSuggestions" class="suggestions"></div>
 
-  <label for="destination">Drop Location / Destination</label>
-  <input id="destination" placeholder="Enter destination">
+    <label for="destination">Destination</label>
+    <input id="destination" placeholder="Type destination" autocomplete="off">
+    <div id="destinationSuggestions" class="suggestions"></div>
 
-  <button id="routeBtn" type="button">Calculate Route & Fare</button>
-  <div id="status" aria-live="polite"></div>
-  <div id="map"></div>
-
-  <div id="tripDateFields">
     <label for="pickupDate">Pickup Date</label>
     <input id="pickupDate" type="date">
 
-    <div id="returnDateGroup" class="hidden">
+    <div id="returnDateWrap" style="display:none">
       <label for="returnDate">Return Date</label>
       <input id="returnDate" type="date">
     </div>
 
     <label for="pickupTime">Pickup Time</label>
     <input id="pickupTime" type="time">
-  </div>
 
-  <div id="rentalFields" class="hidden">
-    <label for="rentalDate">Rental Date</label>
-    <input id="rentalDate" type="date">
+    <label for="vehicle">Vehicle</label>
+    <select id="vehicle">
+      <option value="sedan">Sedan</option>
+      <option value="suv">SUV (Ertiga)</option>
+      <option value="suvplus">SUV Plus</option>
+    </select>
 
-    <label for="rentalStartTime">Rental Start Time</label>
-    <input id="rentalStartTime" type="time">
+    <label for="passengers">Passengers</label>
+    <input id="passengers" type="number" min="1" value="1">
 
-    <label for="rentalHours">Rental Hours</label>
-    <input id="rentalHours" type="number" min="1" step="1" value="1">
+    <label for="customer">Customer Name</label>
+    <input id="customer" placeholder="Enter customer name">
 
-    <label for="rentalMinutes">Additional Minutes</label>
-    <input id="rentalMinutes" type="number" min="0" max="59" value="0">
+    <label for="mobile">Mobile Number</label>
+    <input id="mobile" type="tel" placeholder="Enter mobile number">
 
-    <label for="rentalKm">Total Rental Kilometres</label>
-    <input id="rentalKm" type="number" min="0" step="0.1" placeholder="Enter total rental km">
+    <label for="pets">Pets</label>
+    <select id="pets">
+      <option value="no">No</option>
+      <option value="yes">Yes (+₹500)</option>
+    </select>
 
-    <p class="note">
-      Rental fare uses the total kilometres and duration entered here.
-      The map route distance is shown separately.
-    </p>
-  </div>
+    <div id="status">Pickup மற்றும் destination இடங்களைத் தேர்வு செய்யுங்கள்.</div>
+    <div id="map"></div>
+  </section>
 
-  <label for="vehicle">Vehicle Category</label>
-  <select id="vehicle">
-    <option value="sedan">Sedan</option>
-    <option value="suv" selected>SUV (6+1)</option>
-    <option value="suvplus">SUV Plus</option>
-  </select>
-
-  <label for="passengers">Passenger Count</label>
-  <input id="passengers" type="number" min="1" max="20" placeholder="Number of passengers">
-
-  <label for="customer">Customer Name</label>
-  <input id="customer" placeholder="Enter your name">
-
-  <label for="mobile">Mobile Number</label>
-  <input id="mobile" type="tel" placeholder="Enter mobile number">
-
-  <div class="check">
-    <input id="pets" type="checkbox">
-    <label for="pets">Travelling with pets (₹500 extra)</label>
-  </div>
-
-  <div id="estimate"></div>
-  <button id="whatsappBtn" type="button">Book via WhatsApp</button>
-
-  <p class="note">
-    Toll, parking, state permits and other additional charges are extra.
-    Please confirm the final fare with RK Cabs before booking.
-  </p>
+  <section class="card">
+    <h2>Fare Estimate</h2>
+    <div class="summary">
+      <div>Route distance: <strong id="routeKm">—</strong></div>
+      <div>Chargeable distance: <strong id="chargeKm">—</strong></div>
+      <div>Trip days: <strong id="tripDays">—</strong></div>
+      <div>Driver bata: <strong id="driverBata">—</strong></div>
+      <div>Estimated fare: <span class="total" id="totalFare">—</span></div>
+      <div class="small">Toll, parking, permit charges (if applicable) are extra.</div>
+    </div>
+    <button id="whatsappBtn">Book via WhatsApp</button>
+  </section>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-const WHATSAPP_NUMBER = "916384253864";
+  // RK Cabs settings
+  const WHATSAPP_NUMBER = "916384253864";
 
-const vehicles = {
-  sedan: {
-    name: "Sedan",
-    tripRate: 15,
-    bata: 400,
-    rentalHour: 300,
-    includedKmPerHour: 10,
-    extraKm: 25,
-    extraMinute: 2
-  },
-  suv: {
-    name: "SUV (6+1)",
-    tripRate: 20,
-    bata: 400,
-    rentalHour: 500,
-    includedKmPerHour: 10,
-    extraKm: 35,
-    extraMinute: 3
-  },
-  suvplus: {
-    name: "SUV Plus",
-    tripRate: 22,
-    bata: 500,
-    rentalHour: 600,
-    includedKmPerHour: 10,
-    extraKm: 40,
-    extraMinute: 3
-  }
-};
-
-const $ = id => document.getElementById(id);
-
-let routeKm = null;
-let map = null;
-let routeLayer = null;
-let pickupMarker = null;
-let destinationMarker = null;
-let lastEstimate = null;
-
-function money(amount) {
-  return "₹" + Math.round(amount).toLocaleString("en-IN");
-}
-
-function setStatus(message) {
-  $("status").textContent = message;
-}
-
-function showEstimate(html) {
-  $("estimate").innerHTML = html;
-  $("estimate").style.display = "block";
-}
-
-function hideEstimate() {
-  $("estimate").style.display = "none";
-  lastEstimate = null;
-}
-
-function updateBookingType() {
-  const rental = $("bookingType").value === "rental";
-
-  $("tripFields").classList.toggle("hidden", rental);
-  $("tripDateFields").classList.toggle("hidden", rental);
-  $("rentalFields").classList.toggle("hidden", !rental);
-
-  updateTripType();
-  hideEstimate();
-}
-
-function updateTripType() {
-  const roundTrip = $("tripType").value === "roundtrip";
-
-  $("returnDateGroup").classList.toggle("hidden", !roundTrip);
-  $("returnDate").required = roundTrip;
-  hideEstimate();
-}
-
-function getTripDays() {
-  if ($("tripType").value !== "roundtrip") return 1;
-
-  const pickupDate = $("pickupDate").value;
-  const returnDate = $("returnDate").value;
-
-  if (!pickupDate || !returnDate) return null;
-
-  const start = new Date(pickupDate + "T00:00:00");
-  const end = new Date(returnDate + "T00:00:00");
-  const days = Math.round((end - start) / 86400000) + 1;
-
-  return days > 0 ? days : null;
-}
-
-async function geocode(place) {
-  const url =
-    "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
-    encodeURIComponent(place);
-
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Location search failed.");
-
-  const data = await response.json();
-  if (!data.length) throw new Error("Location not found: " + place);
-
-  return {
-    lat: Number(data[0].lat),
-    lon: Number(data[0].lon),
-    label: data[0].display_name
+  const rates = {
+    sedan:   { perKm: 15, minOneWay: 130, minPerDay: 250, bata: 400 },
+    suv:     { perKm: 20, minOneWay: 130, minPerDay: 250, bata: 400 },
+    suvplus: { perKm: 22, minOneWay: 130, minPerDay: 250, bata: 500 }
   };
-}
 
-function initializeMap() {
-  if (map) return;
+  const pickupInput = document.getElementById("pickup");
+  const destinationInput = document.getElementById("destination");
+  const statusEl = document.getElementById("status");
 
-  map = L.map("map").setView([11.0168, 76.9558], 7);
+  let pickupPlace = null;
+  let destinationPlace = null;
+  let routeLayer = null;
+  let routeKm = null;
+  let searchTimers = {};
+
+  const map = L.map("map").setView([11.0168, 76.9558], 7);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "&copy; OpenStreetMap contributors"
+    attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
-}
 
-async function calculateRoute() {
-  const pickupText = $("pickup").value.trim();
-  const destinationText = $("destination").value.trim();
-
-  if (!pickupText || !destinationText) {
-    setStatus("Please enter both pickup and destination.");
-    return;
+  function setStatus(message) {
+    statusEl.textContent = message;
   }
 
-  $("routeBtn").disabled = true;
-  setStatus("Finding locations and calculating route...");
-  hideEstimate();
+  function setupAutocomplete(input, box, type) {
+    input.addEventListener("input", () => {
+      clearTimeout(searchTimers[type]);
 
-  try {
-    const [start, end] = await Promise.all([
-      geocode(pickupText),
-      geocode(destinationText)
-    ]);
+      const query = input.value.trim();
+      if (query.length < 3) {
+        box.style.display = "none";
+        box.innerHTML = "";
+        return;
+      }
 
-    const routeUrl =
-      "https://router.project-osrm.org/route/v1/driving/" +
-      start.lon + "," + start.lat + ";" +
-      end.lon + "," + end.lat +
-      "?overview=full&geometries=geojson";
+      searchTimers[type] = setTimeout(async () => {
+        try {
+          const url =
+            "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&countrycodes=in&q=" +
+            encodeURIComponent(query);
 
-    const response = await fetch(routeUrl);
-    if (!response.ok) throw new Error("Route service is unavailable.");
+          const response = await fetch(url);
+          const results = await response.json();
 
-    const data = await response.json();
+          box.innerHTML = "";
+          if (!results.length) {
+            box.style.display = "none";
+            return;
+          }
 
-    if (data.code !== "Ok" || !data.routes.length) {
-      throw new Error("No driving route was found.");
-    }
+          results.forEach(place => {
+            const item = document.createElement("div");
+            item.className = "suggestion";
+            item.textContent = place.display_name;
 
-    routeKm = data.routes[0].distance / 1000;
+            item.addEventListener("click", () => {
+              input.value = place.display_name;
 
-    initializeMap();
-    $("map").style.display = "block";
+              const selected = {
+                name: place.display_name,
+                lat: Number(place.lat),
+                lon: Number(place.lon)
+              };
 
-    if (routeLayer) map.removeLayer(routeLayer);
-    if (pickupMarker) map.removeLayer(pickupMarker);
-    if (destinationMarker) map.removeLayer(destinationMarker);
+              if (type === "pickup") pickupPlace = selected;
+              else destinationPlace = selected;
 
-    const coordinates = data.routes[0].geometry.coordinates.map(point => [
-      point[1], point[0]
-    ]);
+              box.style.display = "none";
+              box.innerHTML = "";
+              calculateRoute();
+            });
 
-    routeLayer = L.polyline(coordinates, {
-      color: "#1769aa",
-      weight: 5
-    }).addTo(map);
+            box.appendChild(item);
+          });
 
-    pickupMarker = L.marker([start.lat, start.lon])
-      .addTo(map)
-      .bindPopup("Pickup");
+          box.style.display = "block";
+        } catch (error) {
+          setStatus("Location search முடியவில்லை. மீண்டும் முயற்சி செய்யுங்கள்.");
+        }
+      }, 600);
+    });
 
-    destinationMarker = L.marker([end.lat, end.lon])
-      .addTo(map)
-      .bindPopup("Destination");
-
-    map.fitBounds(routeLayer.getBounds(), { padding: [20, 20] });
-
-    setStatus(
-      "Estimated driving distance: " + routeKm.toFixed(1) +
-      " km. Route shown on map."
-    );
-
-    calculateFare();
-  } catch (error) {
-    setStatus(error.message + " Check the location spelling and try again.");
-  } finally {
-    $("routeBtn").disabled = false;
+    document.addEventListener("click", event => {
+      if (event.target !== input && !box.contains(event.target)) {
+        box.style.display = "none";
+      }
+    });
   }
-}
 
-function calculateFare() {
-  const vehicle = vehicles[$("vehicle").value];
-  const rental = $("bookingType").value === "rental";
-  const petsCharge = $("pets").checked ? 500 : 0;
+  setupAutocomplete(
+    pickupInput,
+    document.getElementById("pickupSuggestions"),
+    "pickup"
+  );
 
-  if (rental) {
-    const hours = Number($("rentalHours").value);
-    const minutes = Number($("rentalMinutes").value);
-    const km = Number($("rentalKm").value);
+  setupAutocomplete(
+    destinationInput,
+    document.getElementById("destinationSuggestions"),
+    "destination"
+  );
 
-    if (
-      !Number.isFinite(hours) || hours < 1 ||
-      !Number.isFinite(minutes) || minutes < 0 || minutes > 59 ||
-      $("rentalKm").value === "" || !Number.isFinite(km) || km < 0
-    ) {
-      setStatus("Enter valid rental hours, minutes and total kilometres.");
+  async function calculateRoute() {
+    routeKm = null;
+    document.getElementById("routeKm").textContent = "—";
+    document.getElementById("chargeKm").textContent = "—";
+    document.getElementById("totalFare").textContent = "—";
+
+    if (!pickupPlace || !destinationPlace) {
+      setStatus("Pickup மற்றும் destination suggestions-லிருந்து இடங்களைத் தேர்வு செய்யுங்கள்.");
+      updateFare();
       return;
     }
 
-    const totalMinutes = hours * 60 + minutes;
-    const billableHours = Math.ceil(totalMinutes / 60);
-    const includedKm = billableHours * vehicle.includedKmPerHour;
-    const extraKm = Math.max(0, km - includedKm);
+    setStatus("Route கணக்கிடுகிறது…");
 
-    const baseFare = billableHours * vehicle.rentalHour;
-    const extraKmFare = extraKm * vehicle.extraKm;
-    const extraMinuteFare = minutes * vehicle.extraMinute;
-    const total = baseFare + extraKmFare + extraMinuteFare + petsCharge;
+    try {
+      const url =
+        `https://router.project-osrm.org/route/v1/driving/` +
+        `${pickupPlace.lon},${pickupPlace.lat};` +
+        `${destinationPlace.lon},${destinationPlace.lat}` +
+        `?overview=full&geometries=geojson`;
 
-    lastEstimate = {
-      type: "Rental",
-      vehicle: vehicle.name,
-      distance: km,
-      duration: hours + " hour(s), " + minutes + " minute(s)",
-      fare: total
-    };
+      const response = await fetch(url);
+      const data = await response.json();
 
-    showEstimate(
-      "<strong>Estimated Rental Fare: " + money(total) + "</strong><br>" +
-      "Vehicle: " + vehicle.name + "<br>" +
-      "Rental duration: " + lastEstimate.duration + "<br>" +
-      "Entered rental distance: " + km + " km<br>" +
-      "Included distance: " + includedKm + " km<br>" +
-      "Extra distance: " + extraKm.toFixed(1) + " km<br>" +
-      "Base rental: " + money(baseFare) + "<br>" +
-      "Extra km charge: " + money(extraKmFare) + "<br>" +
-      "Extra minute charge: " + money(extraMinuteFare) + "<br>" +
-      "Pet charge: " + money(petsCharge) +
-      (routeKm !== null
-        ? "<br>Map route estimate: " + routeKm.toFixed(1) + " km (separate)"
-        : "")
-    );
+      if (!data.routes || !data.routes.length) {
+        setStatus("இந்த இடங்களுக்கு route கிடைக்கவில்லை.");
+        return;
+      }
 
-    return;
-  }
+      const route = data.routes[0];
+      routeKm = route.distance / 1000;
 
-  if (routeKm === null) {
-    setStatus("Calculate the route first to get the trip fare.");
-    return;
-  }
+      if (routeLayer) map.removeLayer(routeLayer);
 
-  const tripType = $("tripType").value;
-  const days = getTripDays();
+      routeLayer = L.geoJSON(route.geometry, {
+        style: { color: "#1769ff", weight: 5 }
+      }).addTo(map);
 
-  if (days === null) {
-    setStatus("Enter a valid return date on or after the pickup date.");
-    return;
-  }
+      const bounds = routeLayer.getBounds();
+      map.fitBounds(bounds, { padding: [25, 25] });
 
-  const totalKm = tripType === "roundtrip" ? routeKm * 2 : routeKm;
-  const minimumKm = tripType === "roundtrip" ? 250 * days : 130;
-  const chargeableKm = Math.max(totalKm, minimumKm);
+      document.getElementById("routeKm").textContent =
+        routeKm.toFixed(1) + " km";
 
-  let bata = vehicle.bata;
-
-  if (tripType === "oneway" && chargeableKm > 300) {
-    bata = $("vehicle").value === "suvplus" ? 1000 : 800;
-  }
-
-  if (tripType === "roundtrip") {
-    bata = vehicle.bata * days;
-  }
-
-  const kmFare = chargeableKm * vehicle.tripRate;
-  const total = kmFare + bata + petsCharge;
-
-  lastEstimate = {
-    type: tripType === "roundtrip" ? "Round Trip" : "One Way",
-    vehicle: vehicle.name,
-    distance: totalKm,
-    chargeableKm: chargeableKm,
-    days: days,
-    fare: total
-  };
-
-  showEstimate(
-    "<strong>Estimated Trip Fare: " + money(total) + "</strong><br>" +
-    "Trip: " + lastEstimate.type + "<br>" +
-    "Vehicle: " + vehicle.name + "<br>" +
-    "Map one-way distance: " + routeKm.toFixed(1) + " km<br>" +
-    "Estimated total distance: " + totalKm.toFixed(1) + " km<br>" +
-    "Minimum chargeable distance: " + minimumKm + " km<br>" +
-    "Chargeable distance: " + chargeableKm.toFixed(1) + " km<br>" +
-    "Distance fare: " + money(kmFare) + "<br>" +
-    "Driver bata: " + money(bata) + "<br>" +
-    "Pet charge: " + money(petsCharge) +
-    (tripType === "roundtrip" ? "<br>Trip days: " + days : "")
-  );
-}
-
-function getBookingMessage() {
-  const rental = $("bookingType").value === "rental";
-
-  if (!$("customer").value.trim()) {
-    alert("Please enter customer name.");
-    return null;
-  }
-
-  if (!$("mobile").value.trim()) {
-    alert("Please enter mobile number.");
-    return null;
-  }
-
-  if (!lastEstimate) {
-    alert("Please calculate the route and fare first.");
-    return null;
-  }
-
-  const lines = [
-    "RK Cabs Booking Request",
-    "Customer: " + $("customer").value.trim(),
-    "Mobile: " + $("mobile").value.trim(),
-    "Pickup: " + $("pickup").value.trim(),
-    "Destination: " + $("destination").value.trim(),
-    "Vehicle: " + $("vehicle").selectedOptions[0].text,
-    "Passengers: " + ($("passengers").value || "Not specified")
-  ];
-
-  if (rental) {
-    lines.push(
-      "Booking: Rental",
-      "Date: " + $("rentalDate").value,
-      "Start time: " + $("rentalStartTime").value,
-      "Duration: " + $("rentalHours").value + " hour(s), " +
-        $("rentalMinutes").value + " minute(s)",
-      "Rental distance: " + $("rentalKm").value + " km"
-    );
-  } else {
-    lines.push(
-      "Trip: " + $("tripType").selectedOptions[0].text,
-      "Pickup date: " + $("pickupDate").value,
-      "Pickup time: " + $("pickupTime").value
-    );
-
-    if ($("tripType").value === "roundtrip") {
-      lines.push("Return date: " + $("returnDate").value);
+      setStatus("Route மற்றும் kilometre கணக்கிடப்பட்டது.");
+      updateFare();
+    } catch (error) {
+      setStatus("Route கணக்கிட முடியவில்லை. சிறிது நேரம் கழித்து முயற்சி செய்யுங்கள்.");
     }
   }
 
-  lines.push(
-    "Estimated fare: " + money(lastEstimate.fare),
-    "Toll, parking and permits: Extra",
-    "Please confirm availability and final fare."
-  );
+  function getTripDays() {
+    if (document.getElementById("tripType").value === "oneway") return 1;
 
-  return lines.join("\n");
-}
+    const start = document.getElementById("pickupDate").value;
+    const end = document.getElementById("returnDate").value;
 
-$("bookingType").addEventListener("change", updateBookingType);
-$("tripType").addEventListener("change", updateTripType);
-$("routeBtn").addEventListener("click", calculateRoute);
+    if (!start || !end) return 1;
 
-[
-  "vehicle", "pets", "tripType", "pickupDate", "returnDate",
-  "rentalHours", "rentalMinutes", "rentalKm"
-].forEach(id => {
-  $(id).addEventListener("change", calculateFare);
-});
+    const startDate = new Date(start + "T00:00:00");
+    const endDate = new Date(end + "T00:00:00");
 
-$("whatsappBtn").addEventListener("click", () => {
-  const message = getBookingMessage();
-  if (!message) return;
+    const difference = Math.round((endDate - startDate) / 86400000);
+    return difference >= 0 ? difference + 1 : 1;
+  }
 
-  const url = "https://wa.me/" + WHATSAPP_NUMBER +
-    "?text=" + encodeURIComponent(message);
+  function updateFare() {
+    const tripType = document.getElementById("tripType").value;
+    const vehicle = document.getElementById("vehicle").value;
+    const petCharge = document.getElementById("pets").value === "yes" ? 500 : 0;
+    const setting = rates[vehicle];
+    const days = getTripDays();
 
-  window.open(url, "_blank");
-});
+    document.getElementById("tripDays").textContent =
+      tripType === "round" ? days : "1";
 
-updateBookingType();
+    document.getElementById("driverBata").textContent =
+      "₹" + (setting.bata * (tripType === "round" ? days : 1));
+
+    if (routeKm === null) {
+      document.getElementById("chargeKm").textContent = "—";
+      document.getElementById("totalFare").textContent = "—";
+      return;
+    }
+
+    let chargeableKm;
+    let fare;
+
+    if (tripType === "oneway") {
+      chargeableKm = Math.max(routeKm, setting.minOneWay);
+      fare = chargeableKm * setting.perKm;
+    } else {
+      const roundDistance = routeKm * 2;
+      const minimumDistance = setting.minPerDay * days;
+      chargeableKm = Math.max(roundDistance, minimumDistance);
+      fare = chargeableKm * setting.perKm;
+    }
+
+    const bata = setting.bata * (tripType === "round" ? days : 1);
+    const total = fare + bata + petCharge;
+
+    document.getElementById("chargeKm").textContent =
+      chargeableKm.toFixed(1) + " km";
+
+    document.getElementById("totalFare").textContent =
+      "₹" + Math.round(total).toLocaleString("en-IN");
+  }
+
+  document.getElementById("tripType").addEventListener("change", () => {
+    const isRound = document.getElementById("tripType").value === "round";
+    document.getElementById("returnDateWrap").style.display = isRound ? "block" : "none";
+    updateFare();
+  });
+
+  ["vehicle", "pets", "pickupDate", "returnDate"].forEach(id => {
+    document.getElementById(id).addEventListener("change", updateFare);
+  });
+
+  document.getElementById("whatsappBtn").addEventListener("click", () => {
+    const customer = document.getElementById("customer").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+
+    if (!customer || !mobile) {
+      alert("Customer name மற்றும் mobile number உள்ளிடுங்கள்.");
+      return;
+    }
+
+    if (!pickupPlace || !destinationPlace || routeKm === null) {
+      alert("Pickup மற்றும் destination இடங்களைத் தேர்வு செய்து route கணக்கிடுங்கள்.");
+      return;
+    }
+
+    const tripType = document.getElementById("tripType").value;
+    const vehicle = document.getElementById("vehicle").selectedOptions[0].text;
+    const pickupDate = document.getElementById("pickupDate").value || "Not selected";
+    const returnDate = document.getElementById("returnDate").value || "Not applicable";
+    const pickupTime = document.getElementById("pickupTime").value || "Not selected";
+
+    const message =
+      `RK Cabs Booking Request%0A` +
+      `Customer: ${customer}%0A` +
+      `Mobile: ${mobile}%0A` +
+      `Trip: ${tripType === "round" ? "Round Trip" : "One Way Drop"}%0A` +
+      `Pickup: ${pickupPlace.name}%0A` +
+      `Destination: ${destinationPlace.name}%0A` +
+      `Pickup Date: ${pickupDate}%0A` +
+      `Return Date: ${returnDate}%0A` +
+      `Pickup Time: ${pickupTime}%0A` +
+      `Vehicle: ${vehicle}%0A` +
+      `Route Distance: ${routeKm.toFixed(1)} km%0A` +
+      `Estimated Fare: ${document.getElementById("totalFare").textContent}`;
+
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${message}`, "_blank");
+  });
+
+  // Default pickup date = today
+  const today = new Date();
+  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
+    .toISOString().split("T")[0];
+
+  document.getElementById("pickupDate").value = localDate;
+  document.getElementById("returnDate").min = localDate;
+
+  document.getElementById("pickupDate").addEventListener("change", () => {
+    document.getElementById("returnDate").min =
+      document.getElementById("pickupDate").value;
+  });
 </script>
 </body>
 </html>
