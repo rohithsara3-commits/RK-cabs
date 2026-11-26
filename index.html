@@ -1,71 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RK Cabs - Taxi Booking</title>
-
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f3f6fa;
-    color: #222;
-  }
-  header {
-    background: #123b66;
-    color: white;
-    text-align: center;
-    padding: 24px 16px;
-  }
-  header h1 { margin: 0 0 10px; }
-  main {
-    max-width: 650px;
-    margin: 20px auto;
-    padding: 22px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px #0001;
-  }
-  h2 { margin-top: 0; }
-  label {
-    display: block;
-    margin-top: 14px;
-    font-weight: bold;
-  }
-  input, select, button {
-    width: 100%;
-    padding: 12px;
-    margin-top: 6px;
-    border: 1px solid #bbb;
-    border-radius: 7px;
-    font-size: 16px;
-  }
-  button {
-    margin-top: 20px;
-    background: #123b66;
-    color: white;
-    border: 0;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .fare {
-    background: #eef5fb;
-    border-radius: 8px;
-    padding: 15px;
-    margin-top: 20px;
-    line-height: 1.7;
-  }
-  .note {
-    font-size: 14px;
-    color: #555;
-    line-height: 1.6;
-  }
-  .hidden { display: none; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RK Cabs</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #f1f5f9; color: #222; }
+    header { background: #173f68; color: #fff; text-align: center; padding: 24px 12px; }
+    header h1 { margin: 0 0 8px; }
+    main { max-width: 760px; margin: 18px auto; padding: 20px; background: #fff; border-radius: 14px; }
+    label { display: block; margin: 14px 0 6px; font-weight: bold; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #bbb; border-radius: 8px; font-size: 16px; }
+    button { width: 100%; padding: 14px; margin-top: 14px; border: 0; border-radius: 8px; background: #173f68; color: #fff; font-size: 16px; font-weight: bold; }
+    button:disabled { opacity: .6; }
+    #map { height: 300px; margin-top: 14px; display: none; border-radius: 10px; }
+    #status { margin-top: 10px; color: #555; line-height: 1.5; }
+    #estimate { display: none; margin-top: 16px; padding: 16px; background: #edf5fc; border-radius: 10px; line-height: 1.7; }
+    .hidden { display: none !important; }
+    .note { color: #555; font-size: 13px; line-height: 1.5; }
+    .check { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
+    .check input { width: 20px; height: 20px; }
+    .check label { margin: 0; }
+    @media(max-width:600px) { main { margin: 10px; padding: 15px; } }
+  </style>
 </head>
-
 <body>
 <header>
   <h1>RK Cabs</h1>
@@ -75,155 +35,483 @@
 <main>
   <h2>Book Your Ride</h2>
 
-  <form id="bookingForm">
-    <label for="trip">Trip Type</label>
-    <select id="trip" required>
-      <option value="One Way Drop">One Way Drop</option>
-      <option value="Round Trip">Round Trip</option>
-      <option value="Rental">Rental</option>
+  <label for="bookingType">Booking Type</label>
+  <select id="bookingType">
+    <option value="trip">One Way / Round Trip</option>
+    <option value="rental">Rental</option>
+  </select>
+
+  <div id="tripFields">
+    <label for="tripType">Trip Type</label>
+    <select id="tripType">
+      <option value="oneway">One Way Drop</option>
+      <option value="roundtrip">Round Trip</option>
     </select>
+  </div>
 
-    <label for="pickup">Pickup Location</label>
-    <input id="pickup" required placeholder="Enter pickup location">
+  <label for="pickup">Pickup Location</label>
+  <input id="pickup" placeholder="Enter pickup location">
 
-    <label for="drop">Drop Location / Destination</label>
-    <input id="drop" required placeholder="Enter destination">
+  <label for="destination">Drop Location / Destination</label>
+  <input id="destination" placeholder="Enter destination">
 
-    <label for="date">Pickup Date</label>
-    <input id="date" type="date" required>
+  <button id="routeBtn" type="button">Calculate Route & Fare</button>
+  <div id="status" aria-live="polite"></div>
+  <div id="map"></div>
 
-    <label for="time">Pickup Time</label>
-    <input id="time" type="time" required>
+  <div id="tripDateFields">
+    <label for="pickupDate">Pickup Date</label>
+    <input id="pickupDate" type="date">
 
-    <label for="vehicle">Vehicle Category</label>
-    <select id="vehicle" required>
-      <option value="Sedan">Sedan — ₹15/km</option>
-      <option value="SUV (6+1)">SUV (6+1) — ₹20/km</option>
-      <option value="SUV Plus (7+)">SUV Plus (7+) — ₹22/km</option>
-    </select>
-
-    <label for="km">Total Billable Distance (km)</label>
-    <input id="km" type="number" min="1" step="1" required placeholder="Enter estimated total km">
-
-    <div id="daysBox" class="hidden">
-      <label for="days">Number of Days</label>
-      <input id="days" type="number" min="1" step="1" value="1">
+    <div id="returnDateGroup" class="hidden">
+      <label for="returnDate">Return Date</label>
+      <input id="returnDate" type="date">
     </div>
 
-    <label for="passengers">Passenger Count</label>
-    <input id="passengers" type="number" min="1" max="20" required placeholder="Number of passengers">
+    <label for="pickupTime">Pickup Time</label>
+    <input id="pickupTime" type="time">
+  </div>
 
-    <label for="name">Customer Name</label>
-    <input id="name" required placeholder="Enter your name">
+  <div id="rentalFields" class="hidden">
+    <label for="rentalDate">Rental Date</label>
+    <input id="rentalDate" type="date">
 
-    <label for="phone">Mobile Number</label>
-    <input id="phone" type="tel" required placeholder="Enter mobile number">
+    <label for="rentalStartTime">Rental Start Time</label>
+    <input id="rentalStartTime" type="time">
 
-    <label>
-      <input id="pets" type="checkbox" style="width:auto">
-      Travelling with pets (₹500 extra)
-    </label>
+    <label for="rentalHours">Rental Hours</label>
+    <input id="rentalHours" type="number" min="1" step="1" value="1">
 
-    <div class="fare" aria-live="polite">
-      <strong>Estimated Fare</strong>
-      <div id="fareDetails">Enter distance to calculate fare.</div>
-    </div>
+    <label for="rentalMinutes">Additional Minutes</label>
+    <input id="rentalMinutes" type="number" min="0" max="59" value="0">
 
-    <button type="submit">Book via WhatsApp</button>
-  </form>
+    <label for="rentalKm">Total Rental Kilometres</label>
+    <input id="rentalKm" type="number" min="0" step="0.1" placeholder="Enter total rental km">
+
+    <p class="note">
+      Rental fare uses the total kilometres and duration entered here.
+      The map route distance is shown separately.
+    </p>
+  </div>
+
+  <label for="vehicle">Vehicle Category</label>
+  <select id="vehicle">
+    <option value="sedan">Sedan</option>
+    <option value="suv" selected>SUV (6+1)</option>
+    <option value="suvplus">SUV Plus</option>
+  </select>
+
+  <label for="passengers">Passenger Count</label>
+  <input id="passengers" type="number" min="1" max="20" placeholder="Number of passengers">
+
+  <label for="customer">Customer Name</label>
+  <input id="customer" placeholder="Enter your name">
+
+  <label for="mobile">Mobile Number</label>
+  <input id="mobile" type="tel" placeholder="Enter mobile number">
+
+  <div class="check">
+    <input id="pets" type="checkbox">
+    <label for="pets">Travelling with pets (₹500 extra)</label>
+  </div>
+
+  <div id="estimate"></div>
+  <button id="whatsappBtn" type="button">Book via WhatsApp</button>
 
   <p class="note">
-    Please book 2–3 hours before pickup. Inform us about pets while booking.
-    Toll, parking, state permit and other-state permit charges are extra.
-    Cancellation must be informed at least 1 hour before pickup.
-    Final fare may vary according to actual distance and trip details.
+    Toll, parking, state permits and other additional charges are extra.
+    Please confirm the final fare with RK Cabs before booking.
   </p>
 </main>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const $ = id => document.getElementById(id);
+const WHATSAPP_NUMBER = "916384253864";
 
-  const rates = {
-    "Sedan": { rate: 15, bata: 400 },
-    "SUV (6+1)": { rate: 20, bata: 400 },
-    "SUV Plus (7+)": { rate: 22, bata: 500 }
+const vehicles = {
+  sedan: {
+    name: "Sedan",
+    tripRate: 15,
+    bata: 400,
+    rentalHour: 300,
+    includedKmPerHour: 10,
+    extraKm: 25,
+    extraMinute: 2
+  },
+  suv: {
+    name: "SUV (6+1)",
+    tripRate: 20,
+    bata: 400,
+    rentalHour: 500,
+    includedKmPerHour: 10,
+    extraKm: 35,
+    extraMinute: 3
+  },
+  suvplus: {
+    name: "SUV Plus",
+    tripRate: 22,
+    bata: 500,
+    rentalHour: 600,
+    includedKmPerHour: 10,
+    extraKm: 40,
+    extraMinute: 3
+  }
+};
+
+const $ = id => document.getElementById(id);
+
+let routeKm = null;
+let map = null;
+let routeLayer = null;
+let pickupMarker = null;
+let destinationMarker = null;
+let lastEstimate = null;
+
+function money(amount) {
+  return "₹" + Math.round(amount).toLocaleString("en-IN");
+}
+
+function setStatus(message) {
+  $("status").textContent = message;
+}
+
+function showEstimate(html) {
+  $("estimate").innerHTML = html;
+  $("estimate").style.display = "block";
+}
+
+function hideEstimate() {
+  $("estimate").style.display = "none";
+  lastEstimate = null;
+}
+
+function updateBookingType() {
+  const rental = $("bookingType").value === "rental";
+
+  $("tripFields").classList.toggle("hidden", rental);
+  $("tripDateFields").classList.toggle("hidden", rental);
+  $("rentalFields").classList.toggle("hidden", !rental);
+
+  updateTripType();
+  hideEstimate();
+}
+
+function updateTripType() {
+  const roundTrip = $("tripType").value === "roundtrip";
+
+  $("returnDateGroup").classList.toggle("hidden", !roundTrip);
+  $("returnDate").required = roundTrip;
+  hideEstimate();
+}
+
+function getTripDays() {
+  if ($("tripType").value !== "roundtrip") return 1;
+
+  const pickupDate = $("pickupDate").value;
+  const returnDate = $("returnDate").value;
+
+  if (!pickupDate || !returnDate) return null;
+
+  const start = new Date(pickupDate + "T00:00:00");
+  const end = new Date(returnDate + "T00:00:00");
+  const days = Math.round((end - start) / 86400000) + 1;
+
+  return days > 0 ? days : null;
+}
+
+async function geocode(place) {
+  const url =
+    "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+    encodeURIComponent(place);
+
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Location search failed.");
+
+  const data = await response.json();
+  if (!data.length) throw new Error("Location not found: " + place);
+
+  return {
+    lat: Number(data[0].lat),
+    lon: Number(data[0].lon),
+    label: data[0].display_name
   };
+}
 
-  function calculateFare() {
-    const trip = $("trip").value;
-    const vehicle = $("vehicle").value;
-    const km = Number($("km").value) || 0;
-    const days = Math.max(1, Number($("days").value) || 1);
-    const petCharge = $("pets").checked ? 500 : 0;
+function initializeMap() {
+  if (map) return;
 
-    const vehicleInfo = rates[vehicle];
-    const minimumKm = trip === "One Way Drop" ? 130 :
-                      trip === "Round Trip" ? 250 * days : 250 * days;
+  map = L.map("map").setView([11.0168, 76.9558], 7);
 
-    const billableKm = Math.max(km, minimumKm);
-    const distanceFare = billableKm * vehicleInfo.rate;
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors"
+  }).addTo(map);
+}
 
-    let bata = vehicleInfo.bata;
-    if (trip === "One Way Drop" && km > 300) {
-      bata = bata * 2;
-    }
-    if (trip === "Round Trip" || trip === "Rental") {
-      bata = bata * days;
-    }
+async function calculateRoute() {
+  const pickupText = $("pickup").value.trim();
+  const destinationText = $("destination").value.trim();
 
-    const total = distanceFare + bata + petCharge;
-
-    $("fareDetails").innerHTML =
-      `Vehicle rate: ₹${vehicleInfo.rate}/km<br>` +
-      `Minimum billable distance: ${minimumKm} km<br>` +
-      `Billable distance: ${billableKm} km<br>` +
-      `Distance fare: ₹${distanceFare}<br>` +
-      `Driver bata: ₹${bata}<br>` +
-      `Pet charge: ₹${petCharge}<br>` +
-      `<strong>Estimated total: ₹${total}</strong><br>` +
-      `<small>Toll, parking and permit charges are extra.</small>`;
-
-    return { trip, vehicle, km, days, billableKm, distanceFare, bata, petCharge, total };
+  if (!pickupText || !destinationText) {
+    setStatus("Please enter both pickup and destination.");
+    return;
   }
 
-  $("trip").addEventListener("change", () => {
-    $("daysBox").classList.toggle("hidden", $("trip").value === "One Way Drop");
+  $("routeBtn").disabled = true;
+  setStatus("Finding locations and calculating route...");
+  hideEstimate();
+
+  try {
+    const [start, end] = await Promise.all([
+      geocode(pickupText),
+      geocode(destinationText)
+    ]);
+
+    const routeUrl =
+      "https://router.project-osrm.org/route/v1/driving/" +
+      start.lon + "," + start.lat + ";" +
+      end.lon + "," + end.lat +
+      "?overview=full&geometries=geojson";
+
+    const response = await fetch(routeUrl);
+    if (!response.ok) throw new Error("Route service is unavailable.");
+
+    const data = await response.json();
+
+    if (data.code !== "Ok" || !data.routes.length) {
+      throw new Error("No driving route was found.");
+    }
+
+    routeKm = data.routes[0].distance / 1000;
+
+    initializeMap();
+    $("map").style.display = "block";
+
+    if (routeLayer) map.removeLayer(routeLayer);
+    if (pickupMarker) map.removeLayer(pickupMarker);
+    if (destinationMarker) map.removeLayer(destinationMarker);
+
+    const coordinates = data.routes[0].geometry.coordinates.map(point => [
+      point[1], point[0]
+    ]);
+
+    routeLayer = L.polyline(coordinates, {
+      color: "#1769aa",
+      weight: 5
+    }).addTo(map);
+
+    pickupMarker = L.marker([start.lat, start.lon])
+      .addTo(map)
+      .bindPopup("Pickup");
+
+    destinationMarker = L.marker([end.lat, end.lon])
+      .addTo(map)
+      .bindPopup("Destination");
+
+    map.fitBounds(routeLayer.getBounds(), { padding: [20, 20] });
+
+    setStatus(
+      "Estimated driving distance: " + routeKm.toFixed(1) +
+      " km. Route shown on map."
+    );
+
     calculateFare();
-  });
+  } catch (error) {
+    setStatus(error.message + " Check the location spelling and try again.");
+  } finally {
+    $("routeBtn").disabled = false;
+  }
+}
 
-  ["vehicle", "km", "days", "pets"].forEach(id => {
-    $(id).addEventListener("input", calculateFare);
-    $(id).addEventListener("change", calculateFare);
-  });
+function calculateFare() {
+  const vehicle = vehicles[$("vehicle").value];
+  const rental = $("bookingType").value === "rental";
+  const petsCharge = $("pets").checked ? 500 : 0;
 
-  $("bookingForm").addEventListener("submit", function(event) {
-    event.preventDefault();
+  if (rental) {
+    const hours = Number($("rentalHours").value);
+    const minutes = Number($("rentalMinutes").value);
+    const km = Number($("rentalKm").value);
 
-    if (!this.reportValidity()) return;
+    if (
+      !Number.isFinite(hours) || hours < 1 ||
+      !Number.isFinite(minutes) || minutes < 0 || minutes > 59 ||
+      $("rentalKm").value === "" || !Number.isFinite(km) || km < 0
+    ) {
+      setStatus("Enter valid rental hours, minutes and total kilometres.");
+      return;
+    }
 
-    const fare = calculateFare();
+    const totalMinutes = hours * 60 + minutes;
+    const billableHours = Math.ceil(totalMinutes / 60);
+    const includedKm = billableHours * vehicle.includedKmPerHour;
+    const extraKm = Math.max(0, km - includedKm);
 
-    const message =
-      "RK Cabs Booking%0A" +
-      "Trip: " + $("trip").value + "%0A" +
-      "Pickup: " + $("pickup").value + "%0A" +
-      "Destination: " + $("drop").value + "%0A" +
-      "Date: " + $("date").value + "%0A" +
-      "Time: " + $("time").value + "%0A" +
-      "Vehicle: " + $("vehicle").value + "%0A" +
-      "Passengers: " + $("passengers").value + "%0A" +
-      "Distance entered: " + fare.km + " km%0A" +
-      "Billable distance: " + fare.billableKm + " km%0A" +
-      "Estimated fare: ₹" + fare.total + "%0A" +
-      "Customer: " + $("name").value + "%0A" +
-      "Mobile: " + $("phone").value + "%0A" +
-      "Pets: " + ($("pets").checked ? "Yes" : "No") + "%0A" +
-      "Toll, parking and permits: Extra";
+    const baseFare = billableHours * vehicle.rentalHour;
+    const extraKmFare = extraKm * vehicle.extraKm;
+    const extraMinuteFare = minutes * vehicle.extraMinute;
+    const total = baseFare + extraKmFare + extraMinuteFare + petsCharge;
 
-    window.open("https://wa.me/916384253864?text=" + message, "_blank");
-  });
+    lastEstimate = {
+      type: "Rental",
+      vehicle: vehicle.name,
+      distance: km,
+      duration: hours + " hour(s), " + minutes + " minute(s)",
+      fare: total
+    };
 
-  calculateFare();
+    showEstimate(
+      "<strong>Estimated Rental Fare: " + money(total) + "</strong><br>" +
+      "Vehicle: " + vehicle.name + "<br>" +
+      "Rental duration: " + lastEstimate.duration + "<br>" +
+      "Entered rental distance: " + km + " km<br>" +
+      "Included distance: " + includedKm + " km<br>" +
+      "Extra distance: " + extraKm.toFixed(1) + " km<br>" +
+      "Base rental: " + money(baseFare) + "<br>" +
+      "Extra km charge: " + money(extraKmFare) + "<br>" +
+      "Extra minute charge: " + money(extraMinuteFare) + "<br>" +
+      "Pet charge: " + money(petsCharge) +
+      (routeKm !== null
+        ? "<br>Map route estimate: " + routeKm.toFixed(1) + " km (separate)"
+        : "")
+    );
+
+    return;
+  }
+
+  if (routeKm === null) {
+    setStatus("Calculate the route first to get the trip fare.");
+    return;
+  }
+
+  const tripType = $("tripType").value;
+  const days = getTripDays();
+
+  if (days === null) {
+    setStatus("Enter a valid return date on or after the pickup date.");
+    return;
+  }
+
+  const totalKm = tripType === "roundtrip" ? routeKm * 2 : routeKm;
+  const minimumKm = tripType === "roundtrip" ? 250 * days : 130;
+  const chargeableKm = Math.max(totalKm, minimumKm);
+
+  let bata = vehicle.bata;
+
+  if (tripType === "oneway" && chargeableKm > 300) {
+    bata = $("vehicle").value === "suvplus" ? 1000 : 800;
+  }
+
+  if (tripType === "roundtrip") {
+    bata = vehicle.bata * days;
+  }
+
+  const kmFare = chargeableKm * vehicle.tripRate;
+  const total = kmFare + bata + petsCharge;
+
+  lastEstimate = {
+    type: tripType === "roundtrip" ? "Round Trip" : "One Way",
+    vehicle: vehicle.name,
+    distance: totalKm,
+    chargeableKm: chargeableKm,
+    days: days,
+    fare: total
+  };
+
+  showEstimate(
+    "<strong>Estimated Trip Fare: " + money(total) + "</strong><br>" +
+    "Trip: " + lastEstimate.type + "<br>" +
+    "Vehicle: " + vehicle.name + "<br>" +
+    "Map one-way distance: " + routeKm.toFixed(1) + " km<br>" +
+    "Estimated total distance: " + totalKm.toFixed(1) + " km<br>" +
+    "Minimum chargeable distance: " + minimumKm + " km<br>" +
+    "Chargeable distance: " + chargeableKm.toFixed(1) + " km<br>" +
+    "Distance fare: " + money(kmFare) + "<br>" +
+    "Driver bata: " + money(bata) + "<br>" +
+    "Pet charge: " + money(petsCharge) +
+    (tripType === "roundtrip" ? "<br>Trip days: " + days : "")
+  );
+}
+
+function getBookingMessage() {
+  const rental = $("bookingType").value === "rental";
+
+  if (!$("customer").value.trim()) {
+    alert("Please enter customer name.");
+    return null;
+  }
+
+  if (!$("mobile").value.trim()) {
+    alert("Please enter mobile number.");
+    return null;
+  }
+
+  if (!lastEstimate) {
+    alert("Please calculate the route and fare first.");
+    return null;
+  }
+
+  const lines = [
+    "RK Cabs Booking Request",
+    "Customer: " + $("customer").value.trim(),
+    "Mobile: " + $("mobile").value.trim(),
+    "Pickup: " + $("pickup").value.trim(),
+    "Destination: " + $("destination").value.trim(),
+    "Vehicle: " + $("vehicle").selectedOptions[0].text,
+    "Passengers: " + ($("passengers").value || "Not specified")
+  ];
+
+  if (rental) {
+    lines.push(
+      "Booking: Rental",
+      "Date: " + $("rentalDate").value,
+      "Start time: " + $("rentalStartTime").value,
+      "Duration: " + $("rentalHours").value + " hour(s), " +
+        $("rentalMinutes").value + " minute(s)",
+      "Rental distance: " + $("rentalKm").value + " km"
+    );
+  } else {
+    lines.push(
+      "Trip: " + $("tripType").selectedOptions[0].text,
+      "Pickup date: " + $("pickupDate").value,
+      "Pickup time: " + $("pickupTime").value
+    );
+
+    if ($("tripType").value === "roundtrip") {
+      lines.push("Return date: " + $("returnDate").value);
+    }
+  }
+
+  lines.push(
+    "Estimated fare: " + money(lastEstimate.fare),
+    "Toll, parking and permits: Extra",
+    "Please confirm availability and final fare."
+  );
+
+  return lines.join("\n");
+}
+
+$("bookingType").addEventListener("change", updateBookingType);
+$("tripType").addEventListener("change", updateTripType);
+$("routeBtn").addEventListener("click", calculateRoute);
+
+[
+  "vehicle", "pets", "tripType", "pickupDate", "returnDate",
+  "rentalHours", "rentalMinutes", "rentalKm"
+].forEach(id => {
+  $(id).addEventListener("change", calculateFare);
+});
+
+$("whatsappBtn").addEventListener("click", () => {
+  const message = getBookingMessage();
+  if (!message) return;
+
+  const url = "https://wa.me/" + WHATSAPP_NUMBER +
+    "?text=" + encodeURIComponent(message);
+
+  window.open(url, "_blank");
+});
+
+updateBookingType();
 </script>
 </body>
 </html>
