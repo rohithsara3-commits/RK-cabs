@@ -1,130 +1,229 @@
 <!DOCTYPE html>
-<html lang="ta">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RK Cabs - Taxi Booking</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f3f6fa;
-      color: #222;
-    }
-    header {
-      background: #123b66;
-      color: white;
-      padding: 24px 16px;
-      text-align: center;
-    }
-    main {
-      max-width: 520px;
-      margin: 20px auto;
-      padding: 20px;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px #0001;
-    }
-    label {
-      display: block;
-      margin-top: 14px;
-      font-weight: bold;
-    }
-    input, select, button {
-      box-sizing: border-box;
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border: 1px solid #bbb;
-      border-radius: 7px;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 20px;
-      background: #123b66;
-      color: white;
-      border: 0;
-      font-weight: bold;
-    }
-    .note {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.6;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RK Cabs - Taxi Booking</title>
+
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f6fa;
+    color: #222;
+  }
+  header {
+    background: #123b66;
+    color: white;
+    text-align: center;
+    padding: 24px 16px;
+  }
+  header h1 { margin: 0 0 10px; }
+  main {
+    max-width: 650px;
+    margin: 20px auto;
+    padding: 22px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px #0001;
+  }
+  h2 { margin-top: 0; }
+  label {
+    display: block;
+    margin-top: 14px;
+    font-weight: bold;
+  }
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 6px;
+    border: 1px solid #bbb;
+    border-radius: 7px;
+    font-size: 16px;
+  }
+  button {
+    margin-top: 20px;
+    background: #123b66;
+    color: white;
+    border: 0;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .fare {
+    background: #eef5fb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    line-height: 1.7;
+  }
+  .note {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+  }
+  .hidden { display: none; }
+</style>
 </head>
+
 <body>
-  <header>
-    <h1>RK Cabs</h1>
-    <p>Safe and Comfortable Taxi Service</p>
-  </header>
+<header>
+  <h1>RK Cabs</h1>
+  <p>Safe and Comfortable Taxi Service</p>
+</header>
 
-  <main>
-    <h2>Book Your Ride</h2>
+<main>
+  <h2>Book Your Ride</h2>
 
-    <form onsubmit="sendBooking(event)">
-      <label>Trip Type</label>
-      <select id="trip">
-        <option>One Way Drop</option>
-        <option>Round Trip</option>
-        <option>Rental</option>
-      </select>
+  <form id="bookingForm">
+    <label for="trip">Trip Type</label>
+    <select id="trip" required>
+      <option value="One Way Drop">One Way Drop</option>
+      <option value="Round Trip">Round Trip</option>
+      <option value="Rental">Rental</option>
+    </select>
 
-      <label>Pickup Location</label>
-      <input id="pickup" required placeholder="Enter pickup location">
+    <label for="pickup">Pickup Location</label>
+    <input id="pickup" required placeholder="Enter pickup location">
 
-      <label>Drop Location</label>
-      <input id="drop" required placeholder="Enter drop location">
+    <label for="drop">Drop Location / Destination</label>
+    <input id="drop" required placeholder="Enter destination">
 
-      <label>Pickup Date</label>
-      <input id="date" type="date" required>
+    <label for="date">Pickup Date</label>
+    <input id="date" type="date" required>
 
-      <label>Pickup Time</label>
-      <input id="time" type="time" required>
+    <label for="time">Pickup Time</label>
+    <input id="time" type="time" required>
 
-      <label>Vehicle</label>
-      <select id="vehicle">
-        <option>Sedan</option>
-        <option>SUV (6+1)</option>
-        <option>SUV Plus (7+)</option>
-      </select>
+    <label for="vehicle">Vehicle Category</label>
+    <select id="vehicle" required>
+      <option value="Sedan">Sedan — ₹15/km</option>
+      <option value="SUV (6+1)">SUV (6+1) — ₹20/km</option>
+      <option value="SUV Plus (7+)">SUV Plus (7+) — ₹22/km</option>
+    </select>
 
-      <label>Passenger Count</label>
-      <input id="passengers" type="number" min="1" max="7" required>
+    <label for="km">Total Billable Distance (km)</label>
+    <input id="km" type="number" min="1" step="1" required placeholder="Enter estimated total km">
 
-      <label>Customer Name</label>
-      <input id="name" required placeholder="Enter your name">
+    <div id="daysBox" class="hidden">
+      <label for="days">Number of Days</label>
+      <input id="days" type="number" min="1" step="1" value="1">
+    </div>
 
-      <label>Mobile Number</label>
-      <input id="phone" type="tel" required placeholder="Enter mobile number">
+    <label for="passengers">Passenger Count</label>
+    <input id="passengers" type="number" min="1" max="20" required placeholder="Number of passengers">
 
-      <button type="submit">Book via WhatsApp</button>
-    </form>
+    <label for="name">Customer Name</label>
+    <input id="name" required placeholder="Enter your name">
 
-    <p class="note">
-      Please book 2–3 hours before pickup. Inform us about pets while booking.
-      Toll, parking and permit charges are extra.
-    </p>
-  </main>
+    <label for="phone">Mobile Number</label>
+    <input id="phone" type="tel" required placeholder="Enter mobile number">
 
-  <script>
-    function sendBooking(event) {
-      event.preventDefault();
+    <label>
+      <input id="pets" type="checkbox" style="width:auto">
+      Travelling with pets (₹500 extra)
+    </label>
 
-      const message =
-        "RK Cabs Booking%0A" +
-        "Trip: " + document.getElementById("trip").value + "%0A" +
-        "Pickup: " + document.getElementById("pickup").value + "%0A" +
-        "Drop: " + document.getElementById("drop").value + "%0A" +
-        "Date: " + document.getElementById("date").value + "%0A" +
-        "Time: " + document.getElementById("time").value + "%0A" +
-        "Vehicle: " + document.getElementById("vehicle").value + "%0A" +
-        "Passengers: " + document.getElementById("passengers").value + "%0A" +
-        "Name: " + document.getElementById("name").value + "%0A" +
-        "Phone: " + document.getElementById("phone").value;
+    <div class="fare" aria-live="polite">
+      <strong>Estimated Fare</strong>
+      <div id="fareDetails">Enter distance to calculate fare.</div>
+    </div>
 
-      window.open("https://wa.me/916384253864?text=" + message, "_blank");
+    <button type="submit">Book via WhatsApp</button>
+  </form>
+
+  <p class="note">
+    Please book 2–3 hours before pickup. Inform us about pets while booking.
+    Toll, parking, state permit and other-state permit charges are extra.
+    Cancellation must be informed at least 1 hour before pickup.
+    Final fare may vary according to actual distance and trip details.
+  </p>
+</main>
+
+<script>
+  const $ = id => document.getElementById(id);
+
+  const rates = {
+    "Sedan": { rate: 15, bata: 400 },
+    "SUV (6+1)": { rate: 20, bata: 400 },
+    "SUV Plus (7+)": { rate: 22, bata: 500 }
+  };
+
+  function calculateFare() {
+    const trip = $("trip").value;
+    const vehicle = $("vehicle").value;
+    const km = Number($("km").value) || 0;
+    const days = Math.max(1, Number($("days").value) || 1);
+    const petCharge = $("pets").checked ? 500 : 0;
+
+    const vehicleInfo = rates[vehicle];
+    const minimumKm = trip === "One Way Drop" ? 130 :
+                      trip === "Round Trip" ? 250 * days : 250 * days;
+
+    const billableKm = Math.max(km, minimumKm);
+    const distanceFare = billableKm * vehicleInfo.rate;
+
+    let bata = vehicleInfo.bata;
+    if (trip === "One Way Drop" && km > 300) {
+      bata = bata * 2;
     }
-  </script>
+    if (trip === "Round Trip" || trip === "Rental") {
+      bata = bata * days;
+    }
+
+    const total = distanceFare + bata + petCharge;
+
+    $("fareDetails").innerHTML =
+      `Vehicle rate: ₹${vehicleInfo.rate}/km<br>` +
+      `Minimum billable distance: ${minimumKm} km<br>` +
+      `Billable distance: ${billableKm} km<br>` +
+      `Distance fare: ₹${distanceFare}<br>` +
+      `Driver bata: ₹${bata}<br>` +
+      `Pet charge: ₹${petCharge}<br>` +
+      `<strong>Estimated total: ₹${total}</strong><br>` +
+      `<small>Toll, parking and permit charges are extra.</small>`;
+
+    return { trip, vehicle, km, days, billableKm, distanceFare, bata, petCharge, total };
+  }
+
+  $("trip").addEventListener("change", () => {
+    $("daysBox").classList.toggle("hidden", $("trip").value === "One Way Drop");
+    calculateFare();
+  });
+
+  ["vehicle", "km", "days", "pets"].forEach(id => {
+    $(id).addEventListener("input", calculateFare);
+    $(id).addEventListener("change", calculateFare);
+  });
+
+  $("bookingForm").addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    if (!this.reportValidity()) return;
+
+    const fare = calculateFare();
+
+    const message =
+      "RK Cabs Booking%0A" +
+      "Trip: " + $("trip").value + "%0A" +
+      "Pickup: " + $("pickup").value + "%0A" +
+      "Destination: " + $("drop").value + "%0A" +
+      "Date: " + $("date").value + "%0A" +
+      "Time: " + $("time").value + "%0A" +
+      "Vehicle: " + $("vehicle").value + "%0A" +
+      "Passengers: " + $("passengers").value + "%0A" +
+      "Distance entered: " + fare.km + " km%0A" +
+      "Billable distance: " + fare.billableKm + " km%0A" +
+      "Estimated fare: ₹" + fare.total + "%0A" +
+      "Customer: " + $("name").value + "%0A" +
+      "Mobile: " + $("phone").value + "%0A" +
+      "Pets: " + ($("pets").checked ? "Yes" : "No") + "%0A" +
+      "Toll, parking and permits: Extra";
+
+    window.open("https://wa.me/916384253864?text=" + message, "_blank");
+  });
+
+  calculateFare();
+</script>
 </body>
 </html>
